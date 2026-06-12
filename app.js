@@ -1,4 +1,4 @@
-const API_BASE = "ai-workspace-operations-copilot-production.up.railway.app";
+const API_BASE = "https://ai-workspace-operations-copilot-production.up.railway.app";
 
 const chatMessages = document.getElementById("chatMessages");
 const queryInput = document.getElementById("queryInput");
