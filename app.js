@@ -1,4 +1,4 @@
-const API_BASE = "http://localhost:8000";
+const API_BASE = "ai-workspace-operations-copilot-production.up.railway.app";
 
 const chatMessages = document.getElementById("chatMessages");
 const queryInput = document.getElementById("queryInput");
