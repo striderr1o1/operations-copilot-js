@@ -4,7 +4,7 @@
 
 const API_BASE =
   new URLSearchParams(location.search).get("api") ||
-  "http://localhost:8000";
+  "https://ai-workspace-operations-copilot-production.up.railway.app/";
 
 const scenarioSelect = document.getElementById("scenarioSelect");
 const scenarioJson = document.getElementById("scenarioJson");
