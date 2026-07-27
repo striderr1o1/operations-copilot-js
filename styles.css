@@ -80,6 +80,25 @@ body {
   color: var(--t2);
 }
 
+/* Cross-link between the orchestrator and evaluations pages. */
+.header-link {
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 400;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--t3);
+  text-decoration: none;
+  margin-left: 4px;
+  padding-left: 10px;
+  border-left: 1px solid var(--border);
+  transition: color 0.15s ease;
+}
+
+.header-link:hover {
+  color: var(--t1);
+}
+
 .header-right {
   display: flex;
   align-items: center;

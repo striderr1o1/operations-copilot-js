@@ -1,0 +1,509 @@
+/* Evaluations page — sits on top of styles.css, which supplies the tokens,
+   header, status dot and animations shared with the orchestrator page. */
+
+.evals-body {
+  align-items: stretch;
+}
+
+.evals-app {
+  min-width: 0;
+  width: min(1100px, 100%);
+}
+
+.evals-scroll {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.evals-scroll::-webkit-scrollbar {
+  width: 0;
+}
+
+/* ---- Panels ---- */
+
+.panel {
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--surface);
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  animation: fadeUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.panel-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.panel-mark {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--t3);
+  letter-spacing: 2px;
+}
+
+.panel-title {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 3px;
+  text-transform: uppercase;
+  color: var(--t2);
+}
+
+.panel-note {
+  margin-left: auto;
+  font-family: var(--mono);
+  font-size: 8.5px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+
+/* ---- Scenario select ---- */
+
+.select-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.select-wrap {
+  position: relative;
+  flex: 1;
+  max-width: 340px;
+}
+
+#scenarioSelect {
+  width: 100%;
+  appearance: none;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  padding: 10px 30px 10px 11px;
+  color: var(--t1);
+  font-family: var(--mono);
+  font-size: 10.5px;
+  font-weight: 400;
+  letter-spacing: 1.5px;
+  text-transform: lowercase;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+#scenarioSelect:hover:not(:disabled),
+#scenarioSelect:focus {
+  border-color: var(--border-hover);
+}
+
+#scenarioSelect:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+#scenarioSelect option {
+  background: var(--bg);
+  color: var(--t1);
+}
+
+.select-arrow {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--t3);
+  pointer-events: none;
+}
+
+.select-meta {
+  font-family: var(--mono);
+  font-size: 9px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+
+/* ---- Dataset JSON + play ---- */
+
+.scenario-panel {
+  position: relative;
+}
+
+.scenario-json {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.75;
+  color: var(--t2);
+  white-space: pre;
+  overflow: auto;
+  max-height: 300px;
+  padding-right: 62px;
+  tab-size: 2;
+}
+
+.scenario-json::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+.scenario-json::-webkit-scrollbar-thumb {
+  background: var(--t4);
+  border-radius: 2px;
+}
+
+/* Sits on the right edge, halfway down the panel — the run trigger for
+   whatever the panel is currently showing. */
+.play-btn {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--border-hover);
+  background: var(--white);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: opacity 0.2s ease, background 0.2s ease, transform 0.15s ease;
+}
+
+.play-btn:hover:not(:disabled) {
+  transform: translateY(-50%) scale(1.06);
+}
+
+.play-btn:disabled {
+  background: var(--surface);
+  border-color: var(--border);
+  color: var(--t3);
+  cursor: not-allowed;
+}
+
+.play-btn .play-icon {
+  margin-left: 2px;
+}
+
+.play-spinner {
+  display: none;
+  width: 14px;
+  height: 14px;
+  border: 1.5px solid var(--t4);
+  border-top-color: var(--t1);
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+}
+
+.play-btn.running {
+  background: var(--surface);
+  border-color: var(--border-hover);
+  cursor: progress;
+}
+
+.play-btn.running .play-icon {
+  display: none;
+}
+
+.play-btn.running .play-spinner {
+  display: block;
+}
+
+/* ---- Summary ---- */
+
+.summary-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.summary-row[hidden] {
+  display: none;
+}
+
+.stat {
+  flex: 1;
+  min-width: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+}
+
+.stat-value {
+  font-family: var(--mono);
+  font-size: 17px;
+  font-weight: 500;
+  color: var(--t1);
+  line-height: 1;
+}
+
+.stat.pass .stat-value {
+  color: #4ade80;
+}
+
+.stat.fail .stat-value {
+  color: #f87171;
+}
+
+.stat-label {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--t3);
+}
+
+/* ---- Results table ---- */
+
+.results-body {
+  overflow-x: auto;
+}
+
+.results-body::-webkit-scrollbar {
+  height: 4px;
+}
+
+.results-body::-webkit-scrollbar-thumb {
+  background: var(--t4);
+  border-radius: 2px;
+}
+
+.results-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  padding: 32px 0;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.results-table th {
+  text-align: left;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  font-weight: 500;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--t3);
+  white-space: nowrap;
+}
+
+.results-table td {
+  padding: 10px;
+  border-bottom: 1px solid var(--border);
+  vertical-align: top;
+  font-size: 10.5px;
+  line-height: 1.7;
+  color: var(--t2);
+}
+
+.results-table tr:last-child td {
+  border-bottom: none;
+}
+
+.results-table tr.row-fail td {
+  background: rgba(248, 113, 113, 0.03);
+}
+
+.col-id {
+  width: 40px;
+}
+
+.col-verdict {
+  width: 92px;
+}
+
+.col-query {
+  width: 22%;
+}
+
+.cell-id {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  color: var(--t3);
+}
+
+.cell-query {
+  font-weight: 300;
+  color: var(--t2);
+  word-break: break-word;
+}
+
+.verdict {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-family: var(--mono);
+  font-size: 9px;
+  font-weight: 500;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+}
+
+.verdict::before {
+  content: "";
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.verdict.pass {
+  color: #4ade80;
+}
+
+.verdict.pass::before {
+  background: #4ade80;
+  box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+}
+
+.verdict.fail {
+  color: #f87171;
+}
+
+.verdict.fail::before {
+  background: #f87171;
+  box-shadow: 0 0 6px rgba(248, 113, 113, 0.5);
+}
+
+/* Fact lines inside the actual / expected cells */
+
+.facts {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.fact {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.6;
+  color: var(--t2);
+  word-break: break-word;
+}
+
+.fact-key {
+  color: var(--t3);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 8.5px;
+  margin-right: 6px;
+}
+
+.fact-value {
+  color: var(--t1);
+}
+
+.fact-value.muted {
+  color: var(--t3);
+  font-style: italic;
+}
+
+/* Replies run from one line to a full stack trace when the orchestrator
+   errors — clamp them here, the untruncated text is one click away in raw. */
+.fact-value.clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.fact-or {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+  color: var(--t4);
+  padding: 1px 0;
+}
+
+.raw {
+  margin-top: 6px;
+}
+
+.raw summary {
+  font-family: var(--mono);
+  font-size: 8px;
+  letter-spacing: 1.5px;
+  text-transform: uppercase;
+  color: var(--t3);
+  cursor: pointer;
+  list-style: none;
+  user-select: none;
+  transition: color 0.15s ease;
+}
+
+.raw summary::-webkit-details-marker {
+  display: none;
+}
+
+.raw summary::before {
+  content: "+ ";
+}
+
+.raw[open] summary::before {
+  content: "− ";
+}
+
+.raw summary:hover {
+  color: var(--t1);
+}
+
+.raw pre {
+  margin-top: 5px;
+  padding: 7px 8px;
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 8.5px;
+  line-height: 1.6;
+  color: var(--t2);
+  white-space: pre-wrap;
+  word-break: break-word;
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.error-note {
+  padding: 14px;
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  background: var(--bg);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1.7;
+  color: #f87171;
+  word-break: break-word;
+}
+
+@media (max-width: 720px) {
+  .evals-scroll {
+    padding: 14px;
+  }
+
+  .scenario-json {
+    max-height: 220px;
+  }
+}
