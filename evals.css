@@ -1,6 +1,21 @@
 /* Evaluations page — sits on top of styles.css, which supplies the tokens,
    header, status dot and animations shared with the orchestrator page. */
 
+/* The two content surfaces — the dataset dump and the results table — are read
+   closely rather than glanced at, so they sit on a grey that lifts off the
+   near-black shell, carrying white text. Their own scale, because the shell
+   greys are tuned for dim chrome and would be unreadable at body size here. */
+:root {
+  --card: #2b2b2b;
+  --card-sunken: #232323;
+  --card-border: #3d3d3d;
+  --card-t1: #ffffff;
+  --card-t2: #c8c8c8;
+  --card-t3: #8f8f8f;
+  --card-pass: #4ade80;
+  --card-fail: #f87171;
+}
+
 .evals-body {
   align-items: stretch;
 }
@@ -133,60 +148,76 @@
 
 /* ---- Dataset JSON + play ---- */
 
+/* The play button overhangs the bottom edge by half its 40px height. Pad the
+   panel and space the one below it so the disc clears the card above and the
+   results panel below by 10px rather than touching either. */
 .scenario-panel {
   position: relative;
+  padding-bottom: 30px;
+  margin-bottom: 14px;
 }
 
 .scenario-json {
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: 11.5px;
   line-height: 1.75;
-  color: var(--t2);
+  background: var(--card);
+  color: var(--card-t1);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
+  padding: 12px;
   white-space: pre;
   overflow: auto;
   max-height: 300px;
-  padding-right: 62px;
   tab-size: 2;
 }
 
 .scenario-json::-webkit-scrollbar {
-  width: 4px;
-  height: 4px;
+  width: 6px;
+  height: 6px;
+}
+
+.scenario-json::-webkit-scrollbar-track {
+  background: var(--card-sunken);
 }
 
 .scenario-json::-webkit-scrollbar-thumb {
-  background: var(--t4);
-  border-radius: 2px;
+  background: var(--card-t3);
+  border-radius: 3px;
 }
 
-/* Sits on the right edge, halfway down the panel — the run trigger for
-   whatever the panel is currently showing. */
+/* Grey disc straddling the panel's bottom edge, centred horizontally — it sits
+   on the shell rather than on a card, so it keeps its own greys.
+   z-index keeps it above the results panel that follows it in the DOM. */
 .play-btn {
   position: absolute;
-  right: 14px;
-  top: 50%;
-  transform: translateY(-50%);
+  left: 50%;
+  bottom: -20px;
+  transform: translateX(-50%);
+  z-index: 2;
   width: 40px;
   height: 40px;
   border-radius: 50%;
-  border: 1px solid var(--border-hover);
-  background: var(--white);
-  color: var(--bg);
+  border: 1px solid #5c5c5c;
+  background: #4a4a4a;
+  color: #ededed;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: opacity 0.2s ease, background 0.2s ease, transform 0.15s ease;
+  transition: background 0.2s ease, border-color 0.2s ease, transform 0.15s ease;
 }
 
 .play-btn:hover:not(:disabled) {
-  transform: translateY(-50%) scale(1.06);
+  background: #5c5c5c;
+  border-color: #6e6e6e;
+  transform: translateX(-50%) scale(1.06);
 }
 
 .play-btn:disabled {
-  background: var(--surface);
-  border-color: var(--border);
-  color: var(--t3);
+  background: #1c1c1c;
+  border-color: var(--border-hover);
+  color: #3f3f3f;
   cursor: not-allowed;
 }
 
@@ -198,15 +229,15 @@
   display: none;
   width: 14px;
   height: 14px;
-  border: 1.5px solid var(--t4);
-  border-top-color: var(--t1);
+  border: 1.5px solid rgba(255, 255, 255, 0.15);
+  border-top-color: #ededed;
   border-radius: 50%;
   animation: spin 0.6s linear infinite;
 }
 
 .play-btn.running {
-  background: var(--surface);
-  border-color: var(--border-hover);
+  background: #2e2e2e;
+  border-color: #4a4a4a;
   cursor: progress;
 }
 
@@ -237,48 +268,55 @@
   flex-direction: column;
   gap: 4px;
   padding: 10px 12px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--card-border);
   border-radius: 4px;
-  background: var(--bg);
+  background: var(--card);
 }
 
 .stat-value {
   font-family: var(--mono);
-  font-size: 17px;
+  font-size: 19px;
   font-weight: 500;
-  color: var(--t1);
+  color: var(--card-t1);
   line-height: 1;
 }
 
 .stat.pass .stat-value {
-  color: #4ade80;
+  color: var(--card-pass);
 }
 
 .stat.fail .stat-value {
-  color: #f87171;
+  color: var(--card-fail);
 }
 
 .stat-label {
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--t3);
+  color: var(--card-t3);
 }
 
 /* ---- Results table ---- */
 
 .results-body {
   overflow-x: auto;
+  background: var(--card);
+  border: 1px solid var(--card-border);
+  border-radius: 4px;
 }
 
 .results-body::-webkit-scrollbar {
-  height: 4px;
+  height: 6px;
+}
+
+.results-body::-webkit-scrollbar-track {
+  background: var(--card-sunken);
 }
 
 .results-body::-webkit-scrollbar-thumb {
-  background: var(--t4);
-  border-radius: 2px;
+  background: var(--card-t3);
+  border-radius: 3px;
 }
 
 .results-empty {
@@ -287,6 +325,20 @@
   align-items: center;
   gap: 6px;
   padding: 32px 0;
+}
+
+/* The shared empty-state greys are near-black for the dark shell, which would
+   vanish on the lighter card — re-point them at the card scale. */
+.results-empty .empty-mark {
+  color: var(--card-border);
+}
+
+.results-empty .empty-text {
+  color: var(--card-t2);
+}
+
+.results-empty .empty-sub {
+  color: var(--card-t3);
 }
 
 .results-table {
@@ -298,23 +350,24 @@
 .results-table th {
   text-align: left;
   padding: 8px 10px;
-  border-bottom: 1px solid var(--border);
+  background: var(--card-sunken);
+  border-bottom: 1px solid var(--card-border);
   font-family: var(--mono);
-  font-size: 8.5px;
+  font-size: 9.5px;
   font-weight: 500;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--t3);
+  color: var(--card-t2);
   white-space: nowrap;
 }
 
 .results-table td {
   padding: 10px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--card-border);
   vertical-align: top;
-  font-size: 10.5px;
+  font-size: 11.5px;
   line-height: 1.7;
-  color: var(--t2);
+  color: var(--card-t2);
 }
 
 .results-table tr:last-child td {
@@ -322,7 +375,7 @@
 }
 
 .results-table tr.row-fail td {
-  background: rgba(248, 113, 113, 0.03);
+  background: rgba(248, 113, 113, 0.07);
 }
 
 .col-id {
@@ -339,13 +392,13 @@
 
 .cell-id {
   font-family: var(--mono);
-  font-size: 9.5px;
-  color: var(--t3);
+  font-size: 10.5px;
+  color: var(--card-t3);
 }
 
 .cell-query {
-  font-weight: 300;
-  color: var(--t2);
+  font-weight: 400;
+  color: var(--card-t1);
   word-break: break-word;
 }
 
@@ -354,7 +407,7 @@
   align-items: center;
   gap: 5px;
   font-family: var(--mono);
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 500;
   letter-spacing: 1.5px;
   text-transform: uppercase;
@@ -369,21 +422,19 @@
 }
 
 .verdict.pass {
-  color: #4ade80;
+  color: var(--card-pass);
 }
 
 .verdict.pass::before {
-  background: #4ade80;
-  box-shadow: 0 0 6px rgba(74, 222, 128, 0.5);
+  background: var(--card-pass);
 }
 
 .verdict.fail {
-  color: #f87171;
+  color: var(--card-fail);
 }
 
 .verdict.fail::before {
-  background: #f87171;
-  box-shadow: 0 0 6px rgba(248, 113, 113, 0.5);
+  background: var(--card-fail);
 }
 
 /* Fact lines inside the actual / expected cells */
@@ -396,26 +447,26 @@
 
 .fact {
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: 10.5px;
   line-height: 1.6;
-  color: var(--t2);
+  color: var(--card-t2);
   word-break: break-word;
 }
 
 .fact-key {
-  color: var(--t3);
+  color: var(--card-t3);
   letter-spacing: 1px;
   text-transform: uppercase;
-  font-size: 8.5px;
+  font-size: 9.5px;
   margin-right: 6px;
 }
 
 .fact-value {
-  color: var(--t1);
+  color: var(--card-t1);
 }
 
 .fact-value.muted {
-  color: var(--t3);
+  color: var(--card-t3);
   font-style: italic;
 }
 
@@ -431,10 +482,10 @@
 
 .fact-or {
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 2px;
   text-transform: uppercase;
-  color: var(--t4);
+  color: var(--card-t3);
   padding: 1px 0;
 }
 
@@ -444,10 +495,10 @@
 
 .raw summary {
   font-family: var(--mono);
-  font-size: 8px;
+  font-size: 9px;
   letter-spacing: 1.5px;
   text-transform: uppercase;
-  color: var(--t3);
+  color: var(--card-t3);
   cursor: pointer;
   list-style: none;
   user-select: none;
@@ -467,19 +518,19 @@
 }
 
 .raw summary:hover {
-  color: var(--t1);
+  color: var(--card-t1);
 }
 
 .raw pre {
   margin-top: 5px;
   padding: 7px 8px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--card-border);
   border-radius: 3px;
-  background: var(--bg);
+  background: var(--card-sunken);
   font-family: var(--mono);
-  font-size: 8.5px;
+  font-size: 9.5px;
   line-height: 1.6;
-  color: var(--t2);
+  color: var(--card-t2);
   white-space: pre-wrap;
   word-break: break-word;
   max-height: 200px;
@@ -487,14 +538,15 @@
 }
 
 .error-note {
+  margin: 14px;
   padding: 14px;
-  border: 1px solid var(--border);
+  border: 1px solid var(--card-border);
   border-radius: 4px;
-  background: var(--bg);
+  background: var(--card-sunken);
   font-family: var(--mono);
-  font-size: 9.5px;
+  font-size: 10.5px;
   line-height: 1.7;
-  color: #f87171;
+  color: var(--card-fail);
   word-break: break-word;
 }
 
