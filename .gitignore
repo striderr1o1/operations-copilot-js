@@ -1,0 +1,9 @@
+node_modules
+dist
+.vite
+*.local
+.DS_Store
+
+# test artefacts
+tests/screenshots
+.playwright-mcp

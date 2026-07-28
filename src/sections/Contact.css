@@ -1,0 +1,161 @@
+.contact {
+  background:
+    radial-gradient(ellipse 60% 55% at 80% 10%, rgba(6, 101, 126, 0.2), transparent 62%),
+    var(--bg-1);
+  border-top: 1px solid var(--line-soft);
+}
+
+.contact-inner {
+  display: grid;
+  grid-template-columns: 1fr 1.05fr;
+  gap: 56px;
+  align-items: center;
+}
+
+.contact-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-channels {
+  margin: 14px 0 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.contact-channel {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.contact-channel dt {
+  width: 70px;
+  flex-shrink: 0;
+  font-size: 0.68rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.contact-channel dd {
+  margin: 0;
+  font-size: 0.96rem;
+  color: var(--text);
+}
+
+.contact-channel a {
+  color: var(--sea-200);
+  transition: color 0.2s;
+}
+
+.contact-channel a:hover {
+  color: var(--sea);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+/* ---- form ---- */
+
+.contact-form {
+  padding: 30px 28px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.contact-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.contact-textarea {
+  resize: vertical;
+  min-height: 108px;
+  line-height: 1.55;
+  font-family: inherit;
+}
+
+.contact-error {
+  font-size: 0.85rem;
+  color: var(--err);
+  padding: 9px 12px;
+  border-radius: var(--r-sm);
+  background: rgba(248, 113, 113, 0.09);
+  border: 1px solid rgba(248, 113, 113, 0.22);
+}
+
+.contact-fineprint {
+  font-size: 0.78rem;
+  color: var(--faint);
+  text-align: center;
+}
+
+/* ---- success ---- */
+
+.contact-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 26px 0;
+}
+
+.contact-sent-mark {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  color: var(--sea);
+  border: 1px solid var(--line-2);
+  background: rgba(34, 211, 238, 0.1);
+  margin-bottom: 4px;
+}
+
+.contact-sent-title {
+  font-size: 1.24rem;
+  font-weight: 600;
+  letter-spacing: -0.025em;
+}
+
+.contact-sent-body {
+  font-size: 0.94rem;
+  font-weight: 300;
+  color: var(--text-2);
+  max-width: 40ch;
+}
+
+.contact-sent-body strong {
+  color: var(--sea-200);
+  font-weight: 400;
+  word-break: break-word;
+}
+
+@media (max-width: 900px) {
+  .contact-inner {
+    grid-template-columns: 1fr;
+    gap: 38px;
+  }
+}
+
+@media (max-width: 520px) {
+  .contact-row {
+    grid-template-columns: 1fr;
+  }
+
+  .contact-form {
+    padding: 24px 20px;
+  }
+
+  .contact-channel {
+    flex-direction: column;
+    gap: 4px;
+  }
+}

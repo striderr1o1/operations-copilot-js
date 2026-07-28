@@ -1,0 +1,316 @@
+.gs {
+  position: relative;
+  min-height: 100svh;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  background: var(--bg);
+  overflow: hidden;
+}
+
+.gs-bg {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.gs-orb {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(100px);
+}
+
+.gs-orb-a {
+  width: 46vw;
+  height: 46vw;
+  min-width: 360px;
+  min-height: 360px;
+  top: -16%;
+  left: -12%;
+  background: radial-gradient(circle, rgba(34, 211, 238, 0.24), transparent 68%);
+}
+
+.gs-orb-b {
+  width: 40vw;
+  height: 40vw;
+  min-width: 300px;
+  min-height: 300px;
+  bottom: -20%;
+  left: 18%;
+  background: radial-gradient(circle, rgba(6, 101, 126, 0.42), transparent 70%);
+}
+
+/* ---- left: the pitch ---- */
+
+.gs-aside {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 40px;
+  padding: 44px clamp(32px, 5vw, 72px);
+  background:
+    radial-gradient(ellipse 80% 60% at 20% 30%, rgba(6, 101, 126, 0.34), transparent 68%),
+    linear-gradient(170deg, #061e2a, #05121d 60%, var(--bg));
+  border-right: 1px solid var(--line);
+}
+
+.gs-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 1.22rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  align-self: flex-start;
+}
+
+.gs-aside-title {
+  font-size: clamp(1.9rem, 3.3vw, 2.85rem);
+  font-weight: 600;
+  line-height: 1.08;
+  letter-spacing: -0.04em;
+  max-width: 16ch;
+}
+
+.gs-accent {
+  background: linear-gradient(105deg, var(--sea-200), var(--sea) 50%, var(--sea-600));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.gs-benefits {
+  list-style: none;
+  margin: 26px 0 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.gs-benefits li {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  font-size: 0.94rem;
+  font-weight: 300;
+  color: var(--text-2);
+  max-width: 42ch;
+}
+
+.gs-benefits svg {
+  flex-shrink: 0;
+  margin-top: 4px;
+  color: var(--sea);
+}
+
+.gs-aside-foot {
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--faint);
+}
+
+/* ---- right: the form ---- */
+
+.gs-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  padding: 44px 24px;
+}
+
+.gs-card {
+  width: min(430px, 100%);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.gs-brand-mobile {
+  display: none;
+  align-self: center;
+  margin-bottom: 4px;
+}
+
+/* sliding pill toggle between signup and login */
+.gs-switch {
+  position: relative;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding: 4px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  background: var(--bg-2);
+}
+
+.gs-switch-pill {
+  position: absolute;
+  top: 4px;
+  bottom: 4px;
+  left: 4px;
+  width: calc(50% - 4px);
+  border-radius: 99px;
+  background: linear-gradient(135deg, var(--sea) 0%, var(--sea-600) 100%);
+  box-shadow: 0 4px 18px -6px var(--glow);
+  transition: transform 0.38s var(--ease);
+}
+
+.gs-switch-pill.is-right {
+  transform: translateX(100%);
+}
+
+.gs-switch button {
+  position: relative;
+  z-index: 1;
+  padding: 9px 0;
+  font-size: 0.9rem;
+  font-weight: 400;
+  color: var(--muted);
+  border-radius: 99px;
+  transition: color 0.3s var(--ease);
+}
+
+.gs-switch button.is-active {
+  color: #02141b;
+  font-weight: 500;
+}
+
+.gs-head {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.gs-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.gs-sub {
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--text-2);
+}
+
+.gs-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.gs-password {
+  position: relative;
+}
+
+.gs-password .field-input {
+  padding-right: 46px;
+}
+
+.gs-eye {
+  position: absolute;
+  right: 6px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  display: grid;
+  place-items: center;
+  border-radius: 7px;
+  color: var(--muted);
+  transition: color 0.2s, background 0.2s;
+}
+
+.gs-eye:hover {
+  color: var(--sea-200);
+  background: rgba(34, 211, 238, 0.08);
+}
+
+.gs-alert {
+  font-size: 0.86rem;
+  padding: 10px 13px;
+  border-radius: var(--r-sm);
+  line-height: 1.5;
+}
+
+.gs-error {
+  color: #fca5a5;
+  background: rgba(248, 113, 113, 0.09);
+  border: 1px solid rgba(248, 113, 113, 0.24);
+}
+
+.gs-notice {
+  color: var(--sea-200);
+  background: rgba(34, 211, 238, 0.08);
+  border: 1px solid var(--line-2);
+}
+
+.gs-submit {
+  margin-top: 4px;
+  padding: 13px 22px;
+}
+
+.gs-spinner {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  border: 2px solid rgba(2, 20, 27, 0.3);
+  border-top-color: #02141b;
+  animation: gs-spin 0.7s linear infinite;
+}
+
+@keyframes gs-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.gs-toggle-note {
+  text-align: center;
+  font-size: 0.88rem;
+  font-weight: 300;
+  color: var(--muted);
+}
+
+.gs-toggle-note button {
+  color: var(--sea-200);
+  font-weight: 400;
+  transition: color 0.2s;
+}
+
+.gs-toggle-note button:hover {
+  color: var(--sea);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.gs-fineprint {
+  text-align: center;
+  font-size: 0.78rem;
+  color: var(--faint);
+  padding-top: 14px;
+  border-top: 1px solid var(--line-soft);
+}
+
+@media (max-width: 920px) {
+  .gs {
+    grid-template-columns: 1fr;
+  }
+
+  .gs-aside {
+    display: none;
+  }
+
+  .gs-brand-mobile {
+    display: inline-flex;
+  }
+
+  .gs-panel {
+    padding: 34px 20px 48px;
+    align-items: start;
+    padding-top: 48px;
+  }
+}

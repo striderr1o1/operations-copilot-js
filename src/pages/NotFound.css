@@ -1,0 +1,54 @@
+.nf {
+  min-height: 100svh;
+  display: grid;
+  place-items: center;
+  padding: 40px 24px;
+  background:
+    radial-gradient(ellipse 70% 60% at 50% 30%, rgba(6, 101, 126, 0.3), transparent 65%),
+    var(--bg);
+}
+
+.nf-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 14px;
+  max-width: 440px;
+}
+
+.nf-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  font-size: 1.1rem;
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  margin-bottom: 8px;
+}
+
+.nf-code {
+  font-size: 0.8rem;
+  letter-spacing: 0.3em;
+  color: var(--sea);
+}
+
+.nf-title {
+  font-size: clamp(1.7rem, 5vw, 2.3rem);
+  font-weight: 600;
+  letter-spacing: -0.035em;
+}
+
+.nf-body {
+  font-size: 0.96rem;
+  font-weight: 300;
+  color: var(--text-2);
+}
+
+.nf-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 10px;
+}

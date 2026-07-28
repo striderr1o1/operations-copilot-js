@@ -1,0 +1,239 @@
+.tr {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 22px clamp(14px, 2.2vw, 26px);
+  scroll-behavior: smooth;
+}
+
+.tr-msg {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  max-width: 100%;
+  animation: tr-in 0.35s var(--ease) both;
+}
+
+@keyframes tr-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+.tr-body {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+}
+
+.tr-time {
+  font-size: 0.62rem;
+  letter-spacing: 0.07em;
+  color: var(--faint);
+}
+
+/* ---------- console variant (dashboard) ---------- */
+
+.tr-console .tr-msg {
+  padding: 12px 15px;
+  border-radius: var(--r);
+  border: 1px solid var(--line-soft);
+  background: var(--bg-1);
+}
+
+.tr-console .tr-user {
+  border-color: var(--line-2);
+  background: linear-gradient(100deg, rgba(34, 211, 238, 0.09), rgba(34, 211, 238, 0.02));
+}
+
+.tr-console .tr-role {
+  font-size: 0.63rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--sea-300);
+}
+
+.tr-console .tr-assistant .tr-role {
+  color: var(--muted);
+}
+
+.tr-console .tr-body {
+  font-size: 0.94rem;
+  font-weight: 300;
+  color: var(--text);
+}
+
+/* ---------- bubble variant (published page) ---------- */
+
+.tr-bubble .tr-msg {
+  max-width: 78%;
+}
+
+.tr-bubble .tr-user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.tr-bubble .tr-assistant {
+  align-self: flex-start;
+}
+
+.tr-bubble .tr-who {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.09em;
+  text-transform: uppercase;
+  color: var(--sea-300);
+}
+
+.tr-bubble .tr-body {
+  padding: 12px 16px;
+  border-radius: 16px;
+  font-size: 0.95rem;
+  font-weight: 300;
+}
+
+.tr-bubble .tr-assistant .tr-body {
+  background: var(--surface-2);
+  border: 1px solid var(--line-soft);
+  border-bottom-left-radius: 5px;
+  color: var(--text);
+}
+
+.tr-bubble .tr-user .tr-body {
+  background: linear-gradient(135deg, var(--sea) 0%, var(--sea-600) 100%);
+  border-bottom-right-radius: 5px;
+  color: #02141b;
+  font-weight: 400;
+  box-shadow: 0 6px 20px -10px var(--glow);
+}
+
+/* typing dots */
+
+.tr-typing {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 14px 18px !important;
+}
+
+.tr-typing span {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sea-300);
+  animation: tr-dot 1.3s ease-in-out infinite;
+}
+
+.tr-typing span:nth-child(2) {
+  animation-delay: 0.16s;
+}
+
+.tr-typing span:nth-child(3) {
+  animation-delay: 0.32s;
+}
+
+@keyframes tr-dot {
+  0%,
+  60%,
+  100% {
+    opacity: 0.28;
+    transform: translateY(0);
+  }
+  30% {
+    opacity: 1;
+    transform: translateY(-4px);
+  }
+}
+
+/* ---------- reasoning blocks ---------- */
+
+.tr-think {
+  border: 1px solid var(--line-soft);
+  border-left: 2px solid var(--sea-700);
+  border-radius: var(--r-sm);
+  background: rgba(10, 18, 29, 0.6);
+  overflow: hidden;
+}
+
+.tr-think.is-loading {
+  border-left-color: var(--sea);
+}
+
+.tr-think-toggle {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  width: 100%;
+  padding: 9px 13px;
+  text-align: left;
+  transition: background 0.2s;
+}
+
+.tr-think-toggle:hover {
+  background: rgba(34, 211, 238, 0.05);
+}
+
+.tr-think-arrow {
+  color: var(--sea-600);
+  transition: transform 0.25s var(--ease);
+  flex-shrink: 0;
+}
+
+.tr-think.is-open .tr-think-arrow {
+  transform: rotate(90deg);
+}
+
+.tr-think-label {
+  font-size: 0.7rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--sea-300);
+}
+
+.tr-think-spinner {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 1.6px solid rgba(34, 211, 238, 0.25);
+  border-top-color: var(--sea);
+  animation: tr-spin 0.75s linear infinite;
+  margin-left: auto;
+}
+
+@keyframes tr-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.tr-think-content {
+  display: none;
+  padding: 0 14px 12px 31px;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: var(--text-2);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+.tr-think.is-open .tr-think-content {
+  display: block;
+}
+
+@media (max-width: 620px) {
+  .tr {
+    padding: 16px 14px;
+    gap: 12px;
+  }
+
+  .tr-bubble .tr-msg {
+    max-width: 88%;
+  }
+}

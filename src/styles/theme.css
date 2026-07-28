@@ -1,0 +1,347 @@
+/* Receptix design tokens — modern sea blue on black.
+   Every page pulls its colour from here; nothing hardcodes a hex outside of
+   one-off gradients. */
+
+:root {
+  /* surfaces, darkest to lightest */
+  --bg: #04070c;
+  --bg-1: #070c14;
+  --bg-2: #0a121d;
+  --surface: #0c1622;
+  --surface-2: #101d2c;
+  --surface-3: #16293c;
+
+  /* sea blue ramp */
+  --sea-50: #e0f7fb;
+  --sea-200: #8fe4f2;
+  --sea-300: #4fd6ec;
+  --sea: #22d3ee;
+  --sea-500: #0bb6d6;
+  --sea-600: #068fae;
+  --sea-700: #06657e;
+  --sea-900: #052f3d;
+  --deep: #0b4f6c;
+
+  /* text */
+  --text: #e8f4f9;
+  --text-2: #a8c2d1;
+  --muted: #6f8798;
+  --faint: #46596a;
+
+  /* lines + glow */
+  --line: rgba(34, 211, 238, 0.12);
+  --line-2: rgba(34, 211, 238, 0.22);
+  --line-soft: rgba(148, 190, 210, 0.09);
+  --glow: rgba(34, 211, 238, 0.35);
+  --glow-soft: rgba(34, 211, 238, 0.14);
+
+  /* state */
+  --ok: #34d399;
+  --warn: #fbbf24;
+  --err: #f87171;
+
+  /* type */
+  --font: "Outfit", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "DM Mono", ui-monospace, "SF Mono", Menlo, monospace;
+
+  /* geometry */
+  --r-sm: 8px;
+  --r: 12px;
+  --r-lg: 18px;
+  --r-xl: 26px;
+  --nav-h: 72px;
+
+  --ease: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  overflow-x: hidden;
+}
+
+h1,
+h2,
+h3,
+h4,
+p,
+figure {
+  margin: 0;
+}
+
+a {
+  color: inherit;
+  text-decoration: none;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+button {
+  cursor: pointer;
+  background: none;
+  border: none;
+  padding: 0;
+}
+
+img,
+svg,
+canvas {
+  display: block;
+  max-width: 100%;
+}
+
+::selection {
+  background: var(--sea-600);
+  color: #02121a;
+}
+
+/* Scrollbars — thin and sea-tinted, matching the dark chrome */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--sea-700) transparent;
+}
+
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background: var(--sea-900);
+  border-radius: 99px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background: var(--sea-700);
+}
+
+:focus-visible {
+  outline: 2px solid var(--sea);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Anchor targets must clear the fixed navbar when jumped to. */
+section[id] {
+  scroll-margin-top: calc(var(--nav-h) + 14px);
+}
+
+/* ---------- shared primitives ---------- */
+
+.shell {
+  width: min(1200px, 100% - 48px);
+  margin-inline: auto;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--sea-300);
+}
+
+.eyebrow::before {
+  content: "";
+  width: 22px;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--sea));
+}
+
+.section-title {
+  font-size: clamp(1.9rem, 4.2vw, 3rem);
+  font-weight: 600;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+}
+
+.section-sub {
+  color: var(--text-2);
+  font-weight: 300;
+  max-width: 56ch;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  padding: 11px 22px;
+  border-radius: 99px;
+  font-size: 0.94rem;
+  font-weight: 500;
+  letter-spacing: -0.01em;
+  border: 1px solid transparent;
+  transition:
+    transform 0.25s var(--ease),
+    box-shadow 0.25s var(--ease),
+    background 0.25s var(--ease),
+    border-color 0.25s var(--ease),
+    color 0.25s var(--ease);
+  white-space: nowrap;
+}
+
+.btn:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none !important;
+  box-shadow: none !important;
+}
+
+.btn-primary {
+  background: linear-gradient(135deg, var(--sea) 0%, var(--sea-600) 100%);
+  color: #02141b;
+  box-shadow:
+    0 4px 24px -6px var(--glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.28);
+}
+
+.btn-primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow:
+    0 12px 34px -8px var(--glow),
+    inset 0 1px 0 rgba(255, 255, 255, 0.34);
+}
+
+.btn-ghost {
+  border-color: var(--line-2);
+  color: var(--text);
+  background: rgba(34, 211, 238, 0.04);
+}
+
+.btn-ghost:hover:not(:disabled) {
+  border-color: var(--sea);
+  background: rgba(34, 211, 238, 0.1);
+  transform: translateY(-2px);
+}
+
+.btn-block {
+  width: 100%;
+}
+
+/* A field: label above, bordered input that lights up sea blue on focus */
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.field-label {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.field-input {
+  width: 100%;
+  padding: 12px 14px;
+  background: var(--bg-1);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r-sm);
+  color: var(--text);
+  font-size: 0.94rem;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s,
+    background 0.2s;
+}
+
+.field-input::placeholder {
+  color: var(--faint);
+}
+
+.field-input:focus {
+  outline: none;
+  border-color: var(--sea-600);
+  background: var(--bg-2);
+  box-shadow: 0 0 0 3px rgba(34, 211, 238, 0.1);
+}
+
+/* Card surface used by pricing, contact, dashboard panels */
+.card {
+  background:
+    linear-gradient(180deg, rgba(34, 211, 238, 0.035), transparent 55%),
+    var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-lg);
+}
+
+.mono {
+  font-family: var(--mono);
+}
+
+.center-note {
+  text-align: center;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+/* Reveal-on-scroll — see useReveal(). Respects reduced motion below. */
+.reveal {
+  opacity: 0;
+  transform: translateY(26px);
+  transition:
+    opacity 0.8s var(--ease),
+    transform 0.8s var(--ease);
+}
+
+.reveal.in {
+  opacity: 1;
+  transform: none;
+}
+
+@media (max-width: 720px) {
+  .shell {
+    width: min(1200px, 100% - 32px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .reveal {
+    opacity: 1;
+    transform: none;
+  }
+}

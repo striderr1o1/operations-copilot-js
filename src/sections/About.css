@@ -1,0 +1,166 @@
+.about {
+  background:
+    radial-gradient(ellipse 50% 45% at 8% 100%, rgba(6, 101, 126, 0.16), transparent 60%),
+    var(--bg);
+  border-top: 1px solid var(--line-soft);
+  /* the bleed on .about-panel-glow would otherwise widen the document */
+  overflow: hidden;
+}
+
+.about-inner {
+  display: grid;
+  grid-template-columns: 1.25fr 1fr;
+  gap: 56px;
+  align-items: start;
+}
+
+.about-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.about-pillars {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  margin-top: 20px;
+}
+
+.about-pillar {
+  position: relative;
+  padding-left: 20px;
+}
+
+.about-pillar-bar {
+  position: absolute;
+  left: 0;
+  top: 6px;
+  bottom: 6px;
+  width: 2px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, var(--sea), transparent);
+}
+
+.about-pillar-title {
+  font-size: 1.04rem;
+  font-weight: 500;
+  letter-spacing: -0.02em;
+  margin-bottom: 5px;
+}
+
+.about-pillar-body {
+  font-size: 0.92rem;
+  font-weight: 300;
+  color: var(--text-2);
+  max-width: 60ch;
+}
+
+/* ---- right column ---- */
+
+.about-panel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.about-panel-glow {
+  position: absolute;
+  inset: -18% -12% 40%;
+  background: radial-gradient(ellipse at 60% 30%, rgba(34, 211, 238, 0.16), transparent 68%);
+  filter: blur(38px);
+  pointer-events: none;
+}
+
+.about-card {
+  position: relative;
+  padding: 28px 26px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.about-quote {
+  font-size: 1.06rem;
+  font-weight: 300;
+  line-height: 1.6;
+  letter-spacing: -0.015em;
+  color: var(--text);
+}
+
+.about-author {
+  display: flex;
+  align-items: center;
+  gap: 13px;
+  padding-top: 18px;
+  border-top: 1px solid var(--line-soft);
+}
+
+.about-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--sea-200);
+  background: linear-gradient(140deg, rgba(34, 211, 238, 0.2), rgba(6, 101, 126, 0.28));
+  border: 1px solid var(--line-2);
+  flex-shrink: 0;
+}
+
+.about-author-name {
+  font-size: 0.92rem;
+  font-weight: 500;
+}
+
+.about-author-role {
+  font-size: 0.7rem;
+  letter-spacing: 0.09em;
+  color: var(--muted);
+}
+
+.about-facts {
+  position: relative;
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 1px;
+  background: var(--line-soft);
+  border: 1px solid var(--line-soft);
+  border-radius: var(--r);
+  overflow: hidden;
+}
+
+.about-fact {
+  background: var(--bg-1);
+  padding: 16px 18px;
+}
+
+.about-fact dt {
+  font-size: 0.66rem;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.about-fact dd {
+  margin: 5px 0 0;
+  font-size: 0.9rem;
+  color: var(--sea-200);
+}
+
+@media (max-width: 980px) {
+  .about-inner {
+    grid-template-columns: 1fr;
+    gap: 40px;
+  }
+}
+
+@media (max-width: 520px) {
+  .about-facts {
+    grid-template-columns: 1fr;
+  }
+}

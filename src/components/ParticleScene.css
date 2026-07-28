@@ -1,0 +1,90 @@
+.pscene {
+  position: relative;
+  width: 100%;
+  min-height: 520px;
+  aspect-ratio: 10 / 7;
+  isolation: isolate;
+}
+
+/* the pooled shadow the particle field casts onto the hero background */
+.pscene::before {
+  content: "";
+  position: absolute;
+  inset: -12% -8%;
+  z-index: -1;
+  background: radial-gradient(
+    ellipse 62% 58% at 50% 52%,
+    rgba(1, 5, 9, 0.9) 0%,
+    rgba(2, 8, 14, 0.55) 45%,
+    transparent 72%
+  );
+  filter: blur(18px);
+  pointer-events: none;
+}
+
+.pscene-canvas {
+  width: 100%;
+  height: 100%;
+}
+
+.pscene-caption {
+  position: absolute;
+  left: 50%;
+  bottom: 6px;
+  transform: translateX(-50%);
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 15px;
+  border-radius: 99px;
+  background: rgba(6, 14, 22, 0.72);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--text-2);
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+.pscene-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--sea);
+  box-shadow: 0 0 10px var(--sea);
+  animation: pscene-pulse 2s ease-in-out infinite;
+}
+
+@keyframes pscene-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.35;
+    transform: scale(0.72);
+  }
+}
+
+@media (max-width: 980px) {
+  .pscene {
+    min-height: 380px;
+    aspect-ratio: 10 / 6.5;
+  }
+
+  .pscene-caption {
+    font-size: 0.62rem;
+    padding: 6px 12px;
+  }
+}
+
+@media (max-width: 520px) {
+  .pscene {
+    min-height: 300px;
+  }
+}

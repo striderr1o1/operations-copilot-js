@@ -1,0 +1,245 @@
+/* Transparent by default; frosts into a thin dark bar once you scroll. */
+
+.nav {
+  position: fixed;
+  inset: 0 0 auto 0;
+  z-index: 60;
+  height: var(--nav-h);
+  display: flex;
+  align-items: center;
+  background: transparent;
+  border-bottom: 1px solid transparent;
+  transition:
+    background 0.35s var(--ease),
+    border-color 0.35s var(--ease),
+    backdrop-filter 0.35s var(--ease),
+    height 0.35s var(--ease);
+}
+
+.nav-solid {
+  height: 62px;
+  background: rgba(4, 8, 13, 0.72);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border-bottom-color: var(--line);
+}
+
+.nav-inner {
+  width: min(1240px, 100% - 48px);
+  margin-inline: auto;
+  display: flex;
+  align-items: center;
+  gap: 28px;
+}
+
+/* ---- brand ---- */
+
+.nav-brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  margin-right: auto;
+  flex-shrink: 0;
+}
+
+.nav-brand-name {
+  font-size: 1.24rem;
+  font-weight: 600;
+  letter-spacing: -0.035em;
+  background: linear-gradient(100deg, var(--sea-50), var(--sea) 55%, var(--sea-600));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.brand-logo {
+  filter: drop-shadow(0 0 10px rgba(34, 211, 238, 0.35));
+}
+
+/* ---- links ---- */
+
+.nav-links {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-link {
+  position: relative;
+  padding: 8px 14px;
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--text-2);
+  border-radius: 99px;
+  transition: color 0.25s var(--ease), background 0.25s var(--ease);
+}
+
+.nav-link::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  bottom: 2px;
+  width: 0;
+  height: 1px;
+  background: var(--sea);
+  transform: translateX(-50%);
+  transition: width 0.3s var(--ease);
+}
+
+.nav-link:hover {
+  color: var(--text);
+  background: rgba(34, 211, 238, 0.06);
+}
+
+.nav-link.is-active {
+  color: var(--sea-200);
+}
+
+.nav-link.is-active::after {
+  width: 18px;
+}
+
+/* ---- actions ---- */
+
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.nav-cta {
+  padding: 9px 20px;
+  font-size: 0.88rem;
+}
+
+.nav-login {
+  font-size: 0.9rem;
+  font-weight: 300;
+  color: var(--text-2);
+  transition: color 0.25s var(--ease);
+}
+
+.nav-login:hover {
+  color: var(--sea-200);
+}
+
+/* ---- burger ---- */
+
+.nav-burger {
+  display: none;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.nav-burger span {
+  display: block;
+  width: 17px;
+  height: 1.5px;
+  border-radius: 2px;
+  background: var(--sea-200);
+  transition: transform 0.3s var(--ease), opacity 0.2s var(--ease);
+}
+
+.nav-burger.is-open span:nth-child(1) {
+  transform: translateY(6.5px) rotate(45deg);
+}
+
+.nav-burger.is-open span:nth-child(2) {
+  opacity: 0;
+}
+
+.nav-burger.is-open span:nth-child(3) {
+  transform: translateY(-6.5px) rotate(-45deg);
+}
+
+/* ---- mobile sheet ---- */
+
+.nav-sheet {
+  position: fixed;
+  top: 62px;
+  left: 0;
+  right: 0;
+  z-index: 59;
+  padding: 22px 24px 32px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  background: rgba(6, 11, 18, 0.97);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border-bottom: 1px solid var(--line);
+  transform: translateY(-115%);
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    transform 0.42s var(--ease),
+    opacity 0.3s var(--ease),
+    visibility 0.42s;
+}
+
+.nav-sheet.is-open {
+  transform: translateY(0);
+  opacity: 1;
+  visibility: visible;
+}
+
+.nav-sheet-links {
+  display: flex;
+  flex-direction: column;
+}
+
+.nav-sheet-links button {
+  text-align: left;
+  padding: 15px 4px;
+  font-size: 1.06rem;
+  font-weight: 300;
+  color: var(--text-2);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.nav-sheet-links button:active {
+  color: var(--sea);
+}
+
+.nav-sheet-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 11px;
+}
+
+.nav-scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 58;
+  background: rgba(2, 5, 9, 0.68);
+  backdrop-filter: blur(2px);
+}
+
+@media (max-width: 1020px) {
+  .nav-links {
+    display: none;
+  }
+
+  .nav-burger {
+    display: flex;
+  }
+}
+
+@media (max-width: 620px) {
+  .nav-inner {
+    width: min(1240px, 100% - 32px);
+    gap: 14px;
+  }
+
+  .nav-actions {
+    display: none;
+  }
+}
