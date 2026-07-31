@@ -2,8 +2,10 @@
 // `?api=http://127.0.0.1:8000` in the URL overrides it for local work, matching
 // the behaviour the old static pages had.
 
+import { expireSession, getAccessToken } from "./session.js";
+
 const DEFAULT_API =
-  "https://ai-workspace-operations-copilot-production.up.railway.app";
+  "https://ai-workspace-operations-copilot-production.up.railway.app/";
 
 function resolveBase() {
   if (typeof window === "undefined") return DEFAULT_API;
@@ -14,27 +16,45 @@ function resolveBase() {
 
 export const API_BASE = resolveBase();
 
+/**
+ * Add the bearer token when we have one.
+ *
+ * `/query-agent`, `/eval/*` and (soon) `/ingestion` all sit behind the backend's
+ * check_session_exists dependency, which reads `Authorization: Bearer <jwt>`.
+ * `extra` stays optional because multipart uploads must let the browser set
+ * Content-Type itself — it carries the boundary.
+ */
+function authHeaders(extra) {
+  const token = getAccessToken();
+  return token ? { ...extra, Authorization: `Bearer ${token}` } : { ...extra };
+}
+
 /** Throw with the backend's `detail` when there is one, else the status code. */
 async function unwrap(res) {
   const data = await res.json().catch(() => null);
   if (!res.ok) {
+    // A rejected token is dead for every later call too, so drop it here rather
+    // than letting each panel discover the same 401 on its own.
+    if (res.status === 401) expireSession();
     const detail =
       (data && (typeof data.detail === "string" ? data.detail : JSON.stringify(data.detail))) ||
       `HTTP ${res.status}`;
-    throw new Error(detail);
+    const err = new Error(detail);
+    err.status = res.status;
+    throw err;
   }
   return data;
 }
 
 export async function apiGet(path) {
-  return unwrap(await fetch(`${API_BASE}${path}`));
+  return unwrap(await fetch(`${API_BASE}${path}`, { headers: authHeaders() }));
 }
 
 export async function apiPost(path, body) {
   return unwrap(
     await fetch(`${API_BASE}${path}`, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: authHeaders({ "Content-Type": "application/json" }),
       body: body === undefined ? undefined : JSON.stringify(body),
     })
   );
@@ -42,7 +62,11 @@ export async function apiPost(path, body) {
 
 export async function apiUpload(path, formData) {
   return unwrap(
-    await fetch(`${API_BASE}${path}`, { method: "POST", body: formData })
+    await fetch(`${API_BASE}${path}`, {
+      method: "POST",
+      headers: authHeaders(),
+      body: formData,
+    })
   );
 }
 
@@ -73,12 +97,24 @@ export function ingestPdf(file, namespace) {
 export async function streamQuery(query, onEvent, { signal } = {}) {
   const res = await fetch(`${API_BASE}/query-agent`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ query }),
     signal,
   });
 
-  if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  if (!res.ok) {
+    // Nothing streams on the error path — the dependency raises before
+    // StreamingResponse is ever built — so this body is plain JSON and worth
+    // reading for its `detail` instead of reporting a bare status code.
+    if (res.status === 401) expireSession();
+    const detail = await res
+      .json()
+      .then((d) => (typeof d?.detail === "string" ? d.detail : null))
+      .catch(() => null);
+    const err = new Error(detail || `HTTP ${res.status}`);
+    err.status = res.status;
+    throw err;
+  }
   if (!res.body) throw new Error("streaming is not supported by this browser");
 
   const reader = res.body.getReader();

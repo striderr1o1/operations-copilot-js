@@ -269,6 +269,32 @@ const browser = await chromium.launch({ executablePath: "/usr/bin/chromium" });
   await page.screenshot({ path: `${OUT}/desktop-09-ingestion.png` });
 
   // evaluations
+  // /eval/dataset is behind check_session_exists and the seeded token is a
+  // placeholder, so the real backend would 401 here. Stub the shape it returns
+  // (routes/eval.py:55) and let this block test the rendering, which is what it
+  // is actually for. The bearer header itself is covered in AUTH HEADER below.
+  await ctx.route("**/eval/dataset", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({
+        name: "front-desk-routing",
+        layer: "orchestrator",
+        version: 3,
+        description: "routing decisions",
+        categories: [
+          { category: "initial_routing", endpoint: "initial-routing", count: 2 },
+          { category: "irrelevant", endpoint: "irrelevant", count: 1 },
+        ],
+        scenarios: [
+          { id: "s1", category: "initial_routing", expected: ["knowledge_base_agent"], state: { messages: [{ role: "user", content: "what are your hours?" }] } },
+          { id: "s2", category: "initial_routing", expected: ["booking_agent"], state: { messages: [{ role: "user", content: "book me for tuesday" }] } },
+          { id: "s3", category: "irrelevant", expected: [], state: { messages: [{ role: "user", content: "who won the cup?" }] } },
+        ],
+      }),
+    })
+  );
+
   await page.getByRole("link", { name: /Evaluations/ }).click();
   await page.waitForTimeout(1200);
   check("evaluations: page loads", await page.locator(".ev-json").isVisible());
@@ -277,12 +303,11 @@ const browser = await chromium.launch({ executablePath: "/usr/bin/chromium" });
     await page.getByRole("button", { name: "Run evaluation" }).isDisabled()
   );
 
-  // The hosted backend cold-starts, so give the dataset a generous window.
   await page
     .waitForFunction(
       () => document.querySelectorAll(".ev-select-wrap select option").length > 1,
       null,
-      { timeout: 45000 }
+      { timeout: 15000 }
     )
     .catch(() => {});
 
@@ -380,6 +405,121 @@ const browser = await chromium.launch({ executablePath: "/usr/bin/chromium" });
     direct.orch.replace(/\s+/g, " ")
   );
   check("stream: direct answer delivered", direct.reply === "Sure — we open at 6am.", direct.reply);
+}
+
+// ------------------------------------------------------------ AUTH HEADER
+// The backend guards /query-agent, /eval/* and /ingestion with
+// check_session_exists, which reads `Authorization: Bearer <jwt>`. The token was
+// being stored and then never sent, so every dashboard call came back 401.
+// newCtx seeds access_token "t".
+{
+  /** Route `pattern`, capture the request headers, answer with `respond`. */
+  const headersFor = async (pattern, respond, drive) => {
+    const ctx = await newCtx(browser, { viewport: { width: 1440, height: 900 } });
+    const page = await ctx.newPage();
+    let seen = null;
+    await ctx.route(pattern, (route) => {
+      seen = route.request().headers();
+      return route.fulfill(respond);
+    });
+    await drive(page);
+    await ctx.close();
+    return seen || {};
+  };
+
+  const chatHeaders = await headersFor(
+    "**/query-agent",
+    {
+      status: 200,
+      headers: { "content-type": "text/event-stream; charset=utf-8" },
+      body: `data: ${JSON.stringify({ event: "final response", data: "ok" })}\n\n`,
+    },
+    async (page) => {
+      await page.goto(`${BASE}/dashboard/chatbot`, { waitUntil: "networkidle" });
+      await page.locator(".cb-suggestions button").first().click();
+      await page.waitForFunction(
+        () => document.querySelector(".cb-logs-state")?.textContent.trim() === "idle",
+        null,
+        { timeout: 15000 }
+      );
+    }
+  );
+  check(
+    "auth: /query-agent sends the bearer token",
+    chatHeaders.authorization === "Bearer t",
+    chatHeaders.authorization ?? "(no Authorization header)"
+  );
+
+  const evalHeaders = await headersFor(
+    "**/eval/dataset",
+    { status: 200, contentType: "application/json", body: JSON.stringify({ categories: [] }) },
+    async (page) => {
+      await page.goto(`${BASE}/dashboard/evaluations`, { waitUntil: "networkidle" });
+      await page.waitForTimeout(400);
+    }
+  );
+  check(
+    "auth: /eval/dataset sends the bearer token",
+    evalHeaders.authorization === "Bearer t",
+    evalHeaders.authorization ?? "(no Authorization header)"
+  );
+
+  // Uploads must keep the browser's own multipart Content-Type: it carries the
+  // boundary, and hand-setting the header would corrupt the body.
+  // Match on pathname, not "**/ingestion" — that glob also catches the page URL
+  // /dashboard/ingestion and would fulfil the navigation itself with JSON.
+  const uploadHeaders = await headersFor(
+    (url) => url.pathname === "/ingestion",
+    { status: 200, contentType: "application/json", body: JSON.stringify({ chunks: 1 }) },
+    async (page) => {
+      await page.goto(`${BASE}/dashboard/ingestion`, { waitUntil: "networkidle" });
+      await page.setInputFiles('input[type="file"]', {
+        name: "handbook.pdf",
+        mimeType: "application/pdf",
+        buffer: Buffer.from("%PDF-1.4 test"),
+      });
+      await page.fill('input[placeholder="e.g. clinic-policies"]', "clinic-docs");
+      await page.getByRole("button", { name: "Ingest document" }).click();
+      await page.waitForTimeout(800);
+    }
+  );
+  check(
+    "auth: /ingestion sends the bearer token",
+    uploadHeaders.authorization === "Bearer t",
+    uploadHeaders.authorization ?? "(no Authorization header)"
+  );
+  check(
+    "auth: /ingestion keeps the multipart boundary",
+    (uploadHeaders["content-type"] || "").startsWith("multipart/form-data; boundary="),
+    uploadHeaders["content-type"] ?? "(none)"
+  );
+
+  // A token the backend rejects is dead everywhere, so drop it and send the
+  // owner back to log in rather than leaving a dashboard that only 401s.
+  {
+    const ctx = await newCtx(browser, { viewport: { width: 1440, height: 900 } });
+    const page = await ctx.newPage();
+    await ctx.route("**/query-agent", (route) =>
+      route.fulfill({
+        status: 401,
+        contentType: "application/json",
+        body: JSON.stringify({ detail: "Missing bearer token" }),
+      })
+    );
+    await page.goto(`${BASE}/dashboard/chatbot`, { waitUntil: "networkidle" });
+    await page.locator(".cb-suggestions button").first().click();
+    await page.waitForURL(/\/get-started|\/login/, { timeout: 15000 }).catch(() => {});
+    check(
+      "auth: a 401 bounces the owner back to log in",
+      /\/get-started|\/login/.test(page.url()),
+      page.url()
+    );
+    check(
+      "auth: a 401 clears the stored session",
+      (await page.evaluate(() => localStorage.getItem("receptix.session"))) === null
+    );
+    await ctx.close();
+  }
 }
 
 // ------------------------------------------------------- PUBLISHED CHAT

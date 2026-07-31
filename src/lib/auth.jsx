@@ -1,46 +1,36 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { onSessionExpired, readSession, writeSession } from "./session.js";
 
 // Session lives in localStorage so a refresh doesn't bounce you back to the
-// login page. The backend hands back { user, session } — we keep both.
-
-const STORAGE_KEY = "receptix.session";
+// login page. The backend hands back { user, session } — we keep both. Storage
+// itself is session.js's job, because api.js needs the same token and can't
+// read React context.
 
 const AuthContext = createContext(null);
 
-function readStored() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    // expires_at is a unix timestamp in seconds; drop the session once it's past
-    if (parsed?.session?.expires_at && parsed.session.expires_at * 1000 < Date.now()) {
-      localStorage.removeItem(STORAGE_KEY);
-      return null;
-    }
-    return parsed;
-  } catch {
-    return null;
-  }
-}
-
 export function AuthProvider({ children }) {
-  const [auth, setAuth] = useState(readStored);
+  const [auth, setAuth] = useState(readSession);
 
   useEffect(() => {
-    if (auth) localStorage.setItem(STORAGE_KEY, JSON.stringify(auth));
-    else localStorage.removeItem(STORAGE_KEY);
+    writeSession(auth);
   }, [auth]);
 
   const login = useCallback((payload) => setAuth(payload), []);
   const logout = useCallback(() => setAuth(null), []);
 
+  // api.js fires this when the backend 401s a token we thought was good. Without
+  // it the dashboard would keep rendering while every request underneath failed.
+  useEffect(() => onSessionExpired(() => setAuth(null)), []);
+
   const value = useMemo(
     () => ({
       user: auth?.user ?? null,
       session: auth?.session ?? null,
-      // Email confirmation is on server-side, so a fresh signup has a user but
-      // no session. Treat "has a user record" as signed in for the dashboard.
-      isAuthed: Boolean(auth?.user),
+      // The access token, not the user record, is what makes the dashboard
+      // usable: every panel calls an endpoint behind check_session_exists. A
+      // signup awaiting email confirmation returns a user with no session, and
+      // letting that through would land them on a dashboard that only 401s.
+      isAuthed: Boolean(auth?.session?.access_token),
       login,
       logout,
     }),
