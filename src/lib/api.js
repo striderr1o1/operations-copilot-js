@@ -5,7 +5,7 @@
 import { expireSession, getAccessToken } from "./session.js";
 
 const DEFAULT_API =
-  "https://ai-workspace-operations-copilot-production.up.railway.app/";
+  "http://localhost:8000";
 
 function resolveBase() {
   if (typeof window === "undefined") return DEFAULT_API;
@@ -79,6 +79,11 @@ export const signIn = (email, password) => apiPost("/auth/login", { email, passw
 
 export const fetchDataset = () => apiGet("/eval/dataset");
 export const runEvalCategory = (endpoint) => apiPost(`/eval/${endpoint}`);
+
+// ---- deployment ----
+
+export const fetchPublicUrl = () => apiGet("/get-url");
+export const setPublishStatus = (published) => apiPost("/set-publish", { published });
 
 // ---- ingestion ----
 

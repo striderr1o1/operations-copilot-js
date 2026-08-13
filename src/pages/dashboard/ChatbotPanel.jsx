@@ -14,10 +14,9 @@ const SUGGESTIONS = [
 
 export default function ChatbotPanel() {
   const { items, logs, busy, send, reset } = useAgentChat();
-  const { published, setPublished, publicUrl, slug, update } = useDeployment();
+  const { published, setPublished, publicUrl, publicSlug } = useDeployment();
   const [showLogs, setShowLogs] = useState(true);
   const [copied, setCopied] = useState(false);
-  const [editingSlug, setEditingSlug] = useState(false);
 
   const copyUrl = async () => {
     try {
@@ -87,30 +86,14 @@ export default function ChatbotPanel() {
         </div>
 
         <div className="cb-url">
-          {editingSlug ? (
-            <input
-              className="cb-slug-input"
-              value={slug}
-              autoFocus
-              onChange={(e) =>
-                update({ slug: e.target.value.toLowerCase().replace(/[^a-z0-9-]/g, "-") })
-              }
-              onBlur={() => setEditingSlug(false)}
-              onKeyDown={(e) => e.key === "Enter" && setEditingSlug(false)}
-              aria-label="Public URL slug"
-            />
-          ) : (
-            <code className="cb-url-text" onClick={() => setEditingSlug(true)} title="Click to edit the slug">
-              {publicUrl}
-            </code>
-          )}
+          <code className="cb-url-text">{publicUrl}</code>
 
           <button className="cb-url-btn" type="button" onClick={copyUrl}>
             {copied ? "Copied" : "Copy"}
           </button>
           <Link
             className="cb-url-btn cb-url-open"
-            to={`/c/${slug}`}
+            to={`/c/${publicSlug}`}
             target="_blank"
             rel="noreferrer"
           >

@@ -1,11 +1,12 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { fetchPublicUrl, setPublishStatus } from "./api.js";
 
 /**
  * Publish state for the tenant's front desk.
  *
- * The backend has no deployment endpoints yet — /query-agent is always live —
- * so the live/unlive switch and the shareable URL are held client-side. When
- * the API grows a deployments route this is the one file that has to change.
+ * The live/unlive switch is held client-side, but the shareable URL comes from
+ * the backend's /get-url endpoint (the `links` table) so the dashboard and the
+ * database agree on what customers are handed.
  */
 
 const STORAGE_KEY = "receptix.deployment";
@@ -32,25 +33,47 @@ function readStored() {
 
 export function DeploymentProvider({ children }) {
   const [deployment, setDeployment] = useState(readStored);
+  const [remoteUrl, setRemoteUrl] = useState("");
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(deployment));
   }, [deployment]);
 
+  useEffect(() => {
+    // the shareable link and the live state live in the backend `links`
+    // table, not in the browser; a fetch failure (e.g. no session yet)
+    // leaves the stored values in place
+    fetchPublicUrl()
+      .then((data) => {
+        setRemoteUrl(data?.url || "");
+        setDeployment((d) => ({
+          ...d,
+          published: Boolean(data?.published),
+          publishedAt: data?.published ? d.publishedAt ?? Date.now() : null,
+        }));
+      })
+      .catch(() => {});
+  }, []);
+
   const value = useMemo(() => {
     const update = (patch) => setDeployment((d) => ({ ...d, ...patch }));
+    // the shareable code lives in the backend `links` table; the local slug
+    // only backs the URL until that code has loaded
+    const code = remoteUrl || deployment.slug || "front-desk";
     return {
       ...deployment,
       update,
-      setPublished: (published) =>
-        update({ published, publishedAt: published ? Date.now() : null }),
+      // the backend owns the live state: flip locally and tell /set-publish
+      setPublished: (published) => {
+        update({ published, publishedAt: published ? Date.now() : null });
+        setPublishStatus(published).catch(() => {});
+      },
+      publicSlug: code,
       // BASE_URL carries its own trailing slash, and is the repo subpath on
       // Pages — without it the shared link would 404 off the site root.
-      publicUrl: `${window.location.origin}${import.meta.env.BASE_URL}c/${
-        deployment.slug || "front-desk"
-      }`,
+      publicUrl: `${window.location.origin}${import.meta.env.BASE_URL}c/${code}`,
     };
-  }, [deployment]);
+  }, [deployment, remoteUrl]);
 
   return (
     <DeploymentContext.Provider value={value}>{children}</DeploymentContext.Provider>
