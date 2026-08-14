@@ -1,6 +1,5 @@
 import { useRef, useState } from "react";
 import { ingestPdf } from "../../lib/api.js";
-import { useDeployment } from "../../lib/deployment.jsx";
 import { formatTime } from "../../lib/hooks.js";
 import "./IngestionPanel.css";
 
@@ -13,16 +12,14 @@ function prettySize(bytes) {
 }
 
 export default function IngestionPanel() {
-  const { namespace, update } = useDeployment();
   const [file, setFile] = useState(null);
-  const [ns, setNs] = useState(namespace || "");
   const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
   const inputRef = useRef(null);
 
-  const ready = Boolean(file) && ns.trim().length > 0 && !busy;
+  const ready = Boolean(file) && !busy;
 
   const pick = (candidate) => {
     setError("");
@@ -46,15 +43,12 @@ export default function IngestionPanel() {
 
   async function ingest() {
     if (!ready) return;
-    const namespaceName = ns.trim();
 
     setBusy(true);
     setError("");
     try {
-      await ingestPdf(file, namespaceName);
-      record({ name: file.name, size: file.size, namespace: namespaceName, ok: true });
-      // Remember the namespace so the next upload defaults to the same corpus
-      update({ namespace: namespaceName });
+      await ingestPdf(file);
+      record({ name: file.name, size: file.size, ok: true });
       setFile(null);
       if (inputRef.current) inputRef.current.value = "";
     } catch (err) {
@@ -63,7 +57,6 @@ export default function IngestionPanel() {
       record({
         name: file.name,
         size: file.size,
-        namespace: namespaceName,
         ok: false,
         message,
       });
@@ -81,11 +74,6 @@ export default function IngestionPanel() {
             Add PDFs to the knowledge base your agent answers from.
           </span>
         </div>
-        {namespace && (
-          <span className="ing-current mono">
-            active namespace · {namespace}
-          </span>
-        )}
       </header>
 
       <div className="panel-body">
@@ -134,22 +122,6 @@ export default function IngestionPanel() {
               )}
             </label>
 
-            <div className="field ing-ns">
-              <span className="field-label">Namespace</span>
-              <input
-                className="field-input"
-                value={ns}
-                onChange={(e) => setNs(e.target.value)}
-                placeholder="e.g. clinic-policies"
-                autoComplete="off"
-                spellCheck="false"
-              />
-              <span className="ing-ns-note">
-                Documents are isolated per namespace. Retrieval only searches the
-                one your agent is pointed at.
-              </span>
-            </div>
-
             {error && <p className="ing-error">{error}</p>}
 
             <button className="btn btn-primary btn-block" type="button" onClick={ingest} disabled={!ready}>
@@ -197,7 +169,7 @@ export default function IngestionPanel() {
                       <div className="ing-list-text">
                         <span className="ing-list-name">{h.name}</span>
                         <span className="ing-list-meta mono">
-                          {h.namespace} · {prettySize(h.size)} · {h.time}
+                          {prettySize(h.size)} · {h.time}
                         </span>
                         {!h.ok && <span className="ing-list-err">{h.message}</span>}
                       </div>

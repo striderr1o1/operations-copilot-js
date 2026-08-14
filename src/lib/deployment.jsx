@@ -14,7 +14,6 @@ const STORAGE_KEY = "receptix.deployment";
 const DEFAULTS = {
   published: false,
   slug: "acme-clinic",
-  namespace: "",
   botName: "Receptix Front Desk",
   greeting: "Hi! I'm the front desk assistant. Ask me anything — hours, services, or booking a visit.",
   publishedAt: null,

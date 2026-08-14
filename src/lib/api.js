@@ -87,10 +87,9 @@ export const setPublishStatus = (published) => apiPost("/set-publish", { publish
 
 // ---- ingestion ----
 
-export function ingestPdf(file, namespace) {
+export function ingestPdf(file) {
   const form = new FormData();
   form.append("file", file);
-  form.append("namespace_name", namespace);
   return apiUpload("/ingestion", form);
 }
 
