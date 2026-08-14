@@ -6,6 +6,7 @@ import { useDeployment } from "../lib/deployment.jsx";
 import ChatbotPanel from "./dashboard/ChatbotPanel.jsx";
 import IngestionPanel from "./dashboard/IngestionPanel.jsx";
 import EvaluationsPanel from "./dashboard/EvaluationsPanel.jsx";
+import CheckSlotsPanel from "./dashboard/CheckSlotsPanel.jsx";
 import "./Dashboard.css";
 
 // Absolute paths: relative `to` would resolve against the current dashboard
@@ -44,6 +45,20 @@ const NAV = [
         <rect x="7" y="12" width="3" height="6" rx="1" />
         <rect x="12.5" y="8" width="3" height="10" rx="1" />
         <rect x="18" y="4.5" width="3" height="13.5" rx="1" />
+      </>
+    ),
+  },
+  {
+    to: "/dashboard/check-slots",
+    label: "Check Slots",
+    hint: "view bookings",
+    icon: (
+      <>
+        <rect x="3" y="4" width="18" height="18" rx="2" />
+        <line x1="16" y1="2" x2="16" y2="6" />
+        <line x1="8" y1="2" x2="8" y2="6" />
+        <line x1="3" y1="10" x2="21" y2="10" />
+        <path d="M8 14h.01M12 14h.01M16 14h.01M8 18h.01M12 18h.01M16 18h.01" />
       </>
     ),
   },
@@ -160,6 +175,7 @@ export default function Dashboard() {
             <Route path="chatbot" element={<ChatbotPanel />} />
             <Route path="ingestion" element={<IngestionPanel />} />
             <Route path="evaluations" element={<EvaluationsPanel />} />
+            <Route path="check-slots" element={<CheckSlotsPanel />} />
             <Route path="*" element={<Navigate to="/dashboard/chatbot" replace />} />
           </Routes>
         </div>

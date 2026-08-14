@@ -1,0 +1,91 @@
+.slots-count {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+}
+
+.slots-card {
+  max-width: 1080px;
+  padding: 22px;
+}
+
+.slots-state {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 180px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.slots-state.is-error {
+  color: #fca5a5;
+}
+
+.slots-state-mark {
+  color: var(--faint);
+}
+
+.slots-spinner {
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  border: 2px solid var(--line-2);
+  border-top-color: var(--sea);
+  animation: slots-spin 0.7s linear infinite;
+}
+
+@keyframes slots-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.slots-table-wrap {
+  overflow-x: auto;
+}
+
+.slots-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.86rem;
+}
+
+.slots-table th,
+.slots-table td {
+  text-align: left;
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line-soft);
+  white-space: nowrap;
+}
+
+.slots-table th {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--faint);
+  font-weight: 400;
+}
+
+.slots-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.slots-table tbody tr:hover {
+  background: rgba(34, 211, 238, 0.04);
+}
+
+.slots-table td {
+  color: var(--text-2);
+}
+
+.slots-table td:first-child {
+  color: var(--text);
+}
+
+.slots-id {
+  color: var(--faint) !important;
+  font-size: 0.72rem;
+}

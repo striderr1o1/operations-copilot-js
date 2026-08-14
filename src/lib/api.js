@@ -93,6 +93,10 @@ export function ingestPdf(file) {
   return apiUpload("/ingestion", form);
 }
 
+// ---- slots ----
+
+export const fetchSlots = () => apiGet("/get-slots-data");
+
 /**
  * POST /query-agent and walk the SSE stream, invoking `onEvent` for each
  * `data:` frame. The backend emits "agent calls", "knowledge base agent",
