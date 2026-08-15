@@ -74,16 +74,14 @@ export default function CheckSlotsPanel() {
                     <th>start</th>
                     <th>end</th>
                     <th>occupier email</th>
-                    <th>slot id</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {slots.map((slot) => (
-                    <tr key={slot.slotid}>
+                  {slots.map((slot, index) => (
+                    <tr key={slot.slotid || `${slot.time_start}-${index}`}>
                       <td className="mono">{formatSlotTime(slot.time_start)}</td>
                       <td className="mono">{formatSlotTime(slot.time_end)}</td>
                       <td>{slot.occupier_email || "—"}</td>
-                      <td className="slots-id mono">{slot.slotid || "—"}</td>
                     </tr>
                   ))}
                 </tbody>

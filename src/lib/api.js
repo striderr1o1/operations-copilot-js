@@ -95,7 +95,15 @@ export function ingestPdf(file) {
 
 // ---- slots ----
 
-export const fetchSlots = () => apiGet("/get-slots-data");
+export const fetchSlots = async () => {
+  const data = await apiGet("/get-slots-data");
+  const slots = (data?.slots ?? []).map(({ time_start, time_end, occupier_email }) => ({
+    time_start,
+    time_end,
+    occupier_email,
+  }));
+  return { ...data, slots };
+};
 
 /**
  * POST /query-agent and walk the SSE stream, invoking `onEvent` for each
