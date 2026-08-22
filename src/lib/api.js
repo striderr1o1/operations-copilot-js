@@ -112,8 +112,8 @@ export const fetchSlots = async () => {
  * `data:` frame. The backend emits "agent calls", "knowledge base agent",
  * "booking agent" and "final response".
  */
-export async function streamQuery(query, onEvent, { signal } = {}) {
-  const res = await fetch(`${API_BASE}/query-agent`, {
+export async function streamQuery(query, onEvent, { signal, id } = {}) {
+  const res = await fetch(`${API_BASE}${id ? `/c/query-agent/${id}` : "/query-agent"}`, {
     method: "POST",
     headers: authHeaders({ "Content-Type": "application/json" }),
     body: JSON.stringify({ query }),

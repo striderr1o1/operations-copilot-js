@@ -16,7 +16,7 @@ export default function PublishedChat() {
   const { slug } = useParams();
   const { published, botName, greeting } = useDeployment();
   // Customers never sign in — the reasoning blocks stay in the operator view.
-  const { items, busy, send } = useAgentChat({ withThinking: false, greeting });
+  const { items, busy, send } = useAgentChat({ withThinking: false, greeting, id: slug });
 
   if (!published) return <Offline slug={slug} />;
 

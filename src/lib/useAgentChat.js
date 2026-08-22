@@ -22,7 +22,7 @@ const AGENT_EVENT = {
   "booking agent": "booking_agent",
 };
 
-export function useAgentChat({ withThinking = true, greeting = "" } = {}) {
+export function useAgentChat({ withThinking = true, greeting = "", id } = {}) {
   const [items, setItems] = useState(() =>
     greeting
       ? [{ id: nextId(), kind: "assistant", text: greeting, time: formatTime() }]
@@ -173,7 +173,7 @@ export function useAgentChat({ withThinking = true, greeting = "" } = {}) {
                 break;
             }
           },
-          { signal: controller.signal }
+          { signal: controller.signal, id }
         );
 
         // The stream can close without a final frame if the graph errored out.
@@ -211,7 +211,7 @@ export function useAgentChat({ withThinking = true, greeting = "" } = {}) {
         setBusy(false);
       }
     },
-    [busy, log, patch, push, withThinking]
+    [busy, log, patch, push, withThinking, id]
   );
 
   const stop = useCallback(() => {
