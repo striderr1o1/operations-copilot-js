@@ -1,5 +1,5 @@
-import { useRef, useState } from "react";
-import { ingestPdf } from "../../lib/api.js";
+import { useEffect, useRef, useState } from "react";
+import { fetchRecordCount, ingestPdf } from "../../lib/api.js";
 import { formatTime } from "../../lib/hooks.js";
 import "./IngestionPanel.css";
 
@@ -11,15 +11,49 @@ function prettySize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
+// record_names entries come back either as a plain id string or as
+// { id: "..." } — accept both and drop anything else rather than
+// crashing the panel.
+function cleanRecordNames(recordNames) {
+  return recordNames
+    .map((entry) => (typeof entry === "string" ? entry : entry?.id))
+    .filter((id) => typeof id === "string");
+}
+
 export default function IngestionPanel() {
   const [file, setFile] = useState(null);
   const [dragging, setDragging] = useState(false);
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
+  const [kbCount, setKbCount] = useState(0);
+  const [kbRecords, setKbRecords] = useState([]);
+  const [kbLoading, setKbLoading] = useState(true);
+  const [kbError, setKbError] = useState("");
   const inputRef = useRef(null);
 
   const ready = Boolean(file) && !busy;
+
+  const loadRecordCount = () => {
+    setKbError("");
+    return fetchRecordCount()
+      .then((data) => {
+        setKbCount(data?.count ?? 0);
+        setKbRecords(cleanRecordNames(data?.record_names ?? []));
+      })
+      .catch((err) => setKbError(err.message || "knowledge base unavailable"));
+  };
+
+  useEffect(() => {
+    let alive = true;
+    setKbLoading(true);
+    loadRecordCount().finally(() => {
+      if (alive) setKbLoading(false);
+    });
+    return () => {
+      alive = false;
+    };
+  }, []);
 
   const pick = (candidate) => {
     setError("");
@@ -51,6 +85,7 @@ export default function IngestionPanel() {
       record({ name: file.name, size: file.size, ok: true });
       setFile(null);
       if (inputRef.current) inputRef.current.value = "";
+      loadRecordCount();
     } catch (err) {
       const message = err.message || "ingestion failed";
       setError(message);
@@ -143,6 +178,31 @@ export default function IngestionPanel() {
           </section>
 
           <section className="ing-side">
+            <article className="ing-kb card">
+              <div className="ing-kb-head">
+                <h3 className="ing-note-title">Knowledge base</h3>
+                <span className="ing-kb-count mono">
+                  {kbLoading ? "loading…" : `${kbCount} record${kbCount === 1 ? "" : "s"}`}
+                </span>
+              </div>
+
+              {kbError ? (
+                <p className="ing-error">{kbError}</p>
+              ) : !kbLoading && kbRecords.length === 0 && kbCount === 0 ? (
+                <p className="ing-empty mono">namespace is empty</p>
+              ) : !kbLoading && kbRecords.length === 0 ? (
+                <p className="ing-empty mono">record names unavailable</p>
+              ) : (
+                <ul className="ing-kb-list">
+                  {kbRecords.map((name) => (
+                    <li key={name}>
+                      <span className="ing-kb-doc-name mono">{name}</span>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </article>
+
             <article className="ing-note card">
               <h3 className="ing-note-title">What happens on ingest</h3>
               <ol className="ing-steps">

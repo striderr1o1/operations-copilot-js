@@ -93,6 +93,8 @@ export function ingestPdf(file) {
   return apiUpload("/ingestion", form);
 }
 
+export const fetchRecordCount = () => apiGet("/get-record-count");
+
 // ---- slots ----
 
 export const fetchSlots = async () => {

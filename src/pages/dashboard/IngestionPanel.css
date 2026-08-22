@@ -125,8 +125,55 @@
 }
 
 .ing-note,
-.ing-history {
+.ing-history,
+.ing-kb {
   padding: 20px 22px;
+}
+
+.ing-kb-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.ing-kb-head .ing-note-title {
+  margin-bottom: 0;
+}
+
+.ing-kb-count {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.ing-kb-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 220px;
+  overflow-y: auto;
+}
+
+.ing-kb-list li {
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--line-soft);
+  font-size: 0.8rem;
+}
+
+.ing-kb-list li:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.ing-kb-doc-name {
+  overflow-wrap: anywhere;
+  color: var(--text-2);
 }
 
 .ing-note-title {
