@@ -14,7 +14,7 @@ const SUGGESTIONS = [
 
 export default function ChatbotPanel() {
   const { items, logs, busy, send, reset } = useAgentChat();
-  const { published, setPublished, publicUrl, publicSlug } = useDeployment();
+  const { published, setPublished, publicUrl, publicSlug, urlLoaded } = useDeployment();
   const [showLogs, setShowLogs] = useState(true);
   const [copied, setCopied] = useState(false);
 
@@ -86,16 +86,27 @@ export default function ChatbotPanel() {
         </div>
 
         <div className="cb-url">
-          <code className="cb-url-text">{publicUrl}</code>
+          <code className="cb-url-text">
+            {urlLoaded ? publicUrl : "Fetching your link…"}
+          </code>
 
-          <button className="cb-url-btn" type="button" onClick={copyUrl}>
+          <button
+            className="cb-url-btn"
+            type="button"
+            onClick={copyUrl}
+            disabled={!urlLoaded}
+          >
             {copied ? "Copied" : "Copy"}
           </button>
           <Link
-            className="cb-url-btn cb-url-open"
+            className={`cb-url-btn cb-url-open ${!urlLoaded ? "is-disabled" : ""}`}
             to={`/c/${publicSlug}`}
             target="_blank"
             rel="noreferrer"
+            onClick={(e) => {
+              if (!urlLoaded) e.preventDefault();
+            }}
+            aria-disabled={!urlLoaded}
           >
             Open
           </Link>

@@ -172,6 +172,13 @@
   color: var(--sea-200);
 }
 
+.cb-url-btn:disabled,
+.cb-url-btn.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 /* ---- body: chat + logs ---- */
 
 .cb-body {

@@ -33,6 +33,7 @@ function readStored() {
 export function DeploymentProvider({ children }) {
   const [deployment, setDeployment] = useState(readStored);
   const [remoteUrl, setRemoteUrl] = useState("");
+  const [urlLoaded, setUrlLoaded] = useState(false);
 
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(deployment));
@@ -51,14 +52,17 @@ export function DeploymentProvider({ children }) {
           publishedAt: data?.published ? d.publishedAt ?? Date.now() : null,
         }));
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setUrlLoaded(true));
   }, []);
 
   const value = useMemo(() => {
     const update = (patch) => setDeployment((d) => ({ ...d, ...patch }));
     // the shareable code lives in the backend `links` table; the local slug
-    // only backs the URL until that code has loaded
-    const code = remoteUrl || deployment.slug || "front-desk";
+    // is only a cached fallback, and only once the real fetch has settled —
+    // otherwise the dashboard flashes a stale/placeholder slug before the
+    // real one arrives
+    const code = urlLoaded ? remoteUrl || deployment.slug || "front-desk" : "";
     return {
       ...deployment,
       update,
@@ -67,12 +71,15 @@ export function DeploymentProvider({ children }) {
         update({ published, publishedAt: published ? Date.now() : null });
         setPublishStatus(published).catch(() => {});
       },
+      urlLoaded,
       publicSlug: code,
       // BASE_URL carries its own trailing slash, and is the repo subpath on
       // Pages — without it the shared link would 404 off the site root.
-      publicUrl: `${window.location.origin}${import.meta.env.BASE_URL}c/${code}`,
+      publicUrl: code
+        ? `${window.location.origin}${import.meta.env.BASE_URL}c/${code}`
+        : "",
     };
-  }, [deployment, remoteUrl]);
+  }, [deployment, remoteUrl, urlLoaded]);
 
   return (
     <DeploymentContext.Provider value={value}>{children}</DeploymentContext.Provider>
