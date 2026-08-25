@@ -2,6 +2,17 @@ import { useEffect, useState } from "react";
 import { fetchSlots } from "../../lib/api.js";
 import "./CheckSlotsPanel.css";
 
+function statusTone(status) {
+  const value = (status || "").toLowerCase();
+  if (["confirmed", "booked", "active"].includes(value)) return "is-confirmed";
+  if (["cancelled", "canceled", "expired"].includes(value)) return "is-cancelled";
+  if (["pending", "hold"].includes(value)) return "is-pending";
+  return "is-default";
+}
+
+// slots are stored (and booked by the agent) as UTC timestamps, so render them
+// in UTC too — formatting in the viewer's zone would shift every row away from
+// what the database and the confirmation email actually say
 function formatSlotTime(value) {
   if (!value) return "—";
   const date = new Date(value);
@@ -12,6 +23,7 @@ function formatSlotTime(value) {
     day: "numeric",
     hour: "numeric",
     minute: "2-digit",
+    timeZone: "UTC",
   });
 }
 
@@ -71,9 +83,10 @@ export default function CheckSlotsPanel() {
               <table className="slots-table">
                 <thead>
                   <tr>
-                    <th>start</th>
-                    <th>end</th>
+                    <th>start (utc)</th>
+                    <th>end (utc)</th>
                     <th>occupier email</th>
+                    <th>status</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -82,6 +95,11 @@ export default function CheckSlotsPanel() {
                       <td className="mono">{formatSlotTime(slot.time_start)}</td>
                       <td className="mono">{formatSlotTime(slot.time_end)}</td>
                       <td>{slot.occupier_email || "—"}</td>
+                      <td>
+                        <span className={`slot-status ${statusTone(slot.status)}`}>
+                          {slot.status || "unknown"}
+                        </span>
+                      </td>
                     </tr>
                   ))}
                 </tbody>

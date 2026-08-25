@@ -10,10 +10,10 @@ import { fetchPublicUrl, setPublishStatus } from "./api.js";
  */
 
 const STORAGE_KEY = "receptix.deployment";
+const RETRY_MS = 4000;
 
 const DEFAULTS = {
   published: false,
-  slug: "acme-clinic",
   botName: "Receptix Front Desk",
   greeting: "Hi! I'm the front desk assistant. Ask me anything — hours, services, or booking a visit.",
   publishedAt: null,
@@ -41,28 +41,44 @@ export function DeploymentProvider({ children }) {
 
   useEffect(() => {
     // the shareable link and the live state live in the backend `links`
-    // table, not in the browser; a fetch failure (e.g. no session yet)
-    // leaves the stored values in place
-    fetchPublicUrl()
-      .then((data) => {
-        setRemoteUrl(data?.url || "");
-        setDeployment((d) => ({
-          ...d,
-          published: Boolean(data?.published),
-          publishedAt: data?.published ? d.publishedAt ?? Date.now() : null,
-        }));
-      })
-      .catch(() => {})
-      .finally(() => setUrlLoaded(true));
+    // table, not in the browser. Until the backend hands back a real code the
+    // dashboard has nothing to show, so keep asking (a fetch failure is often
+    // just the session not being ready yet) instead of inventing a slug.
+    let alive = true;
+    let timer;
+
+    const load = () => {
+      fetchPublicUrl()
+        .then((data) => {
+          if (!alive) return;
+          const url = data?.url || "";
+          setRemoteUrl(url);
+          setDeployment((d) => ({
+            ...d,
+            published: Boolean(data?.published),
+            publishedAt: data?.published ? d.publishedAt ?? Date.now() : null,
+          }));
+          if (url) setUrlLoaded(true);
+          else timer = setTimeout(load, RETRY_MS);
+        })
+        .catch(() => {
+          if (alive) timer = setTimeout(load, RETRY_MS);
+        });
+    };
+
+    load();
+    return () => {
+      alive = false;
+      clearTimeout(timer);
+    };
   }, []);
 
   const value = useMemo(() => {
     const update = (patch) => setDeployment((d) => ({ ...d, ...patch }));
-    // the shareable code lives in the backend `links` table; the local slug
-    // is only a cached fallback, and only once the real fetch has settled —
-    // otherwise the dashboard flashes a stale/placeholder slug before the
-    // real one arrives
-    const code = urlLoaded ? remoteUrl || deployment.slug || "front-desk" : "";
+    // the shareable code lives in the backend `links` table and nowhere else —
+    // there is no local placeholder, so the dashboard stays in its loading
+    // state until the real code arrives rather than showing an invented one
+    const code = urlLoaded ? remoteUrl : "";
     return {
       ...deployment,
       update,

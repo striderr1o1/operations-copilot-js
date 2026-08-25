@@ -5,7 +5,7 @@
 import { expireSession, getAccessToken } from "./session.js";
 
 const DEFAULT_API =
-  "http://localhost:8000";
+  "https://ai-workspace-operations-copilot-production.up.railway.app";
 
 function resolveBase() {
   if (typeof window === "undefined") return DEFAULT_API;
@@ -99,11 +99,14 @@ export const fetchRecordCount = () => apiGet("/get-record-count");
 
 export const fetchSlots = async () => {
   const data = await apiGet("/get-slots-data");
-  const slots = (data?.slots ?? []).map(({ time_start, time_end, occupier_email }) => ({
-    time_start,
-    time_end,
-    occupier_email,
-  }));
+  const slots = (data?.slots ?? []).map(
+    ({ time_start, time_end, occupier_email, status }) => ({
+      time_start,
+      time_end,
+      occupier_email,
+      status,
+    })
+  );
   return { ...data, slots };
 };
 
