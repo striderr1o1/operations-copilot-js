@@ -5,7 +5,6 @@ import { useAuth } from "../lib/auth.jsx";
 import { useDeployment } from "../lib/deployment.jsx";
 import ChatbotPanel from "./dashboard/ChatbotPanel.jsx";
 import IngestionPanel from "./dashboard/IngestionPanel.jsx";
-import EvaluationsPanel from "./dashboard/EvaluationsPanel.jsx";
 import CheckSlotsPanel from "./dashboard/CheckSlotsPanel.jsx";
 import "./Dashboard.css";
 
@@ -32,19 +31,6 @@ const NAV = [
         <path d="M17 21H7a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h7l5 5v11a2 2 0 0 1-2 2z" />
         <line x1="12" y1="11" x2="12" y2="17" />
         <polyline points="9 14 12 11 15 14" />
-      </>
-    ),
-  },
-  {
-    to: "/dashboard/evaluations",
-    label: "Evaluations",
-    hint: "grade the router",
-    icon: (
-      <>
-        <path d="M3 3v18h18" />
-        <rect x="7" y="12" width="3" height="6" rx="1" />
-        <rect x="12.5" y="8" width="3" height="10" rx="1" />
-        <rect x="18" y="4.5" width="3" height="13.5" rx="1" />
       </>
     ),
   },
@@ -174,7 +160,6 @@ export default function Dashboard() {
             <Route index element={<Navigate to="/dashboard/chatbot" replace />} />
             <Route path="chatbot" element={<ChatbotPanel />} />
             <Route path="ingestion" element={<IngestionPanel />} />
-            <Route path="evaluations" element={<EvaluationsPanel />} />
             <Route path="check-slots" element={<CheckSlotsPanel />} />
             <Route path="*" element={<Navigate to="/dashboard/chatbot" replace />} />
           </Routes>

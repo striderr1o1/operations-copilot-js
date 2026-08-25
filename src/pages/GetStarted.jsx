@@ -153,7 +153,7 @@ export default function GetStarted({ mode: initialMode = "signup" }) {
             <p className="gs-sub">
               {isSignup
                 ? "One account per company. You'll deploy your front desk from here."
-                : "Log in to manage your front desk, documents and evaluations."}
+                : "Log in to manage your front desk, documents and bookings."}
             </p>
           </header>
 

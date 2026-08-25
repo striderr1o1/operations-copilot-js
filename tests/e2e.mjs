@@ -191,6 +191,15 @@ const browser = await chromium.launch({ executablePath: "/usr/bin/chromium" });
   await noHorizontalScroll(page, "get-started desktop");
 
   // ---- dashboard ----
+  // the shareable link now comes only from /get-url (there is no local
+  // placeholder slug any more), so stub the backend's answer
+  await ctx.route("**/get-url", (route) =>
+    route.fulfill({
+      status: 200,
+      contentType: "application/json",
+      body: JSON.stringify({ url: "acme-clinic", published: false }),
+    })
+  );
   await page.goto(`${BASE}/dashboard`, { waitUntil: "networkidle" });
   await page.waitForTimeout(600);
   check("dashboard: redirects to chatbot", page.url().includes("/dashboard/chatbot"));
@@ -268,73 +277,6 @@ const browser = await chromium.launch({ executablePath: "/usr/bin/chromium" });
   );
   await page.screenshot({ path: `${OUT}/desktop-09-ingestion.png` });
 
-  // evaluations
-  // /eval/dataset is behind check_session_exists and the seeded token is a
-  // placeholder, so the real backend would 401 here. Stub the shape it returns
-  // (routes/eval.py:55) and let this block test the rendering, which is what it
-  // is actually for. The bearer header itself is covered in AUTH HEADER below.
-  await ctx.route("**/eval/dataset", (route) =>
-    route.fulfill({
-      status: 200,
-      contentType: "application/json",
-      body: JSON.stringify({
-        name: "front-desk-routing",
-        layer: "orchestrator",
-        version: 3,
-        description: "routing decisions",
-        categories: [
-          { category: "initial_routing", endpoint: "initial-routing", count: 2 },
-          { category: "irrelevant", endpoint: "irrelevant", count: 1 },
-        ],
-        scenarios: [
-          { id: "s1", category: "initial_routing", expected: ["knowledge_base_agent"], state: { messages: [{ role: "user", content: "what are your hours?" }] } },
-          { id: "s2", category: "initial_routing", expected: ["booking_agent"], state: { messages: [{ role: "user", content: "book me for tuesday" }] } },
-          { id: "s3", category: "irrelevant", expected: [], state: { messages: [{ role: "user", content: "who won the cup?" }] } },
-        ],
-      }),
-    })
-  );
-
-  await page.getByRole("link", { name: /Evaluations/ }).click();
-  await page.waitForTimeout(1200);
-  check("evaluations: page loads", await page.locator(".ev-json").isVisible());
-  check(
-    "evaluations: run disabled until a category is picked",
-    await page.getByRole("button", { name: "Run evaluation" }).isDisabled()
-  );
-
-  await page
-    .waitForFunction(
-      () => document.querySelectorAll(".ev-select-wrap select option").length > 1,
-      null,
-      { timeout: 15000 }
-    )
-    .catch(() => {});
-
-  const datasetNote = await page.locator(".ev-dataset").innerText();
-  const options = await page.locator(".ev-select-wrap select option").count();
-  check(
-    "evaluations: dataset loaded from backend",
-    options > 1,
-    `${options - 1} categories · ${datasetNote}`
-  );
-
-  if (options > 1) {
-    const value = await page.locator(".ev-select-wrap select option").nth(1).getAttribute("value");
-    await page.selectOption(".ev-select-wrap select", value);
-    await page.waitForTimeout(500);
-    const json = await page.locator(".ev-json").innerText();
-    check("evaluations: shows scenario json", json.trim().startsWith("["), json.slice(0, 40));
-    check(
-      "evaluations: run enabled after pick",
-      await page.getByRole("button", { name: "Run evaluation" }).isEnabled()
-    );
-    check(
-      "evaluations: shows target endpoint",
-      (await page.locator(".ev-block-note").first().innerText()).includes("/eval/")
-    );
-  }
-  await page.screenshot({ path: `${OUT}/desktop-10-evaluations.png`, fullPage: true });
   await noHorizontalScroll(page, "dashboard desktop");
 
   await ctx.close();
@@ -408,7 +350,7 @@ const browser = await chromium.launch({ executablePath: "/usr/bin/chromium" });
 }
 
 // ------------------------------------------------------------ AUTH HEADER
-// The backend guards /query-agent, /eval/* and /ingestion with
+// The backend guards /query-agent, /ingestion and /get-slots-data with
 // check_session_exists, which reads `Authorization: Bearer <jwt>`. The token was
 // being stored and then never sent, so every dashboard call came back 401.
 // newCtx seeds access_token "t".
@@ -450,18 +392,18 @@ const browser = await chromium.launch({ executablePath: "/usr/bin/chromium" });
     chatHeaders.authorization ?? "(no Authorization header)"
   );
 
-  const evalHeaders = await headersFor(
-    "**/eval/dataset",
-    { status: 200, contentType: "application/json", body: JSON.stringify({ categories: [] }) },
+  const slotHeaders = await headersFor(
+    "**/get-slots-data",
+    { status: 200, contentType: "application/json", body: JSON.stringify({ slots: [] }) },
     async (page) => {
-      await page.goto(`${BASE}/dashboard/evaluations`, { waitUntil: "networkidle" });
+      await page.goto(`${BASE}/dashboard/check-slots`, { waitUntil: "networkidle" });
       await page.waitForTimeout(400);
     }
   );
   check(
-    "auth: /eval/dataset sends the bearer token",
-    evalHeaders.authorization === "Bearer t",
-    evalHeaders.authorization ?? "(no Authorization header)"
+    "auth: /get-slots-data sends the bearer token",
+    slotHeaders.authorization === "Bearer t",
+    slotHeaders.authorization ?? "(no Authorization header)"
   );
 
   // Uploads must keep the browser's own multipart Content-Type: it carries the
@@ -611,12 +553,12 @@ const browser = await chromium.launch({ executablePath: "/usr/bin/chromium" });
   check("mobile dashboard: drawer opens", await page.locator(".db-side.is-open").isVisible());
   await page.screenshot({ path: `${OUT}/mobile-07-drawer.png` });
 
-  await page.getByRole("link", { name: /Evaluations/ }).click();
+  await page.getByRole("link", { name: /Check Slots/ }).click();
   await page.waitForTimeout(1200);
   check("mobile dashboard: drawer closes on nav", !(await page.locator(".db-side.is-open").isVisible()));
-  check("mobile evaluations: renders", await page.locator(".ev-json").isVisible());
-  await page.screenshot({ path: `${OUT}/mobile-08-evaluations.png` });
-  await noHorizontalScroll(page, "evaluations mobile");
+  check("mobile check slots: renders", await page.locator(".slots-card").isVisible());
+  await page.screenshot({ path: `${OUT}/mobile-08-check-slots.png` });
+  await noHorizontalScroll(page, "check slots mobile");
 
   await page.goto(`${BASE}/dashboard/ingestion`, { waitUntil: "networkidle" });
   await page.waitForTimeout(500);

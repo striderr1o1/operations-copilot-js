@@ -5,7 +5,7 @@
 import { expireSession, getAccessToken } from "./session.js";
 
 const DEFAULT_API =
-  "https://ai-workspace-operations-copilot-production.up.railway.app";
+  "https://ai-workspace-operations-copilot-production.up.railway.app/";
 
 function resolveBase() {
   if (typeof window === "undefined") return DEFAULT_API;
@@ -19,8 +19,9 @@ export const API_BASE = resolveBase();
 /**
  * Add the bearer token when we have one.
  *
- * `/query-agent`, `/eval/*` and (soon) `/ingestion` all sit behind the backend's
- * check_session_exists dependency, which reads `Authorization: Bearer <jwt>`.
+ * `/query-agent`, `/ingestion` and the slot/link endpoints all sit behind the
+ * backend's check_session_exists dependency, which reads
+ * `Authorization: Bearer <jwt>`.
  * `extra` stays optional because multipart uploads must let the browser set
  * Content-Type itself — it carries the boundary.
  */
@@ -75,11 +76,6 @@ export async function apiUpload(path, formData) {
 export const signUp = (email, password) => apiPost("/auth/signup", { email, password });
 export const signIn = (email, password) => apiPost("/auth/login", { email, password });
 
-// ---- evals ----
-
-export const fetchDataset = () => apiGet("/eval/dataset");
-export const runEvalCategory = (endpoint) => apiPost(`/eval/${endpoint}`);
-
 // ---- deployment ----
 
 export const fetchPublicUrl = () => apiGet("/get-url");
@@ -100,7 +96,9 @@ export const fetchRecordCount = () => apiGet("/get-record-count");
 export const fetchSlots = async () => {
   const data = await apiGet("/get-slots-data");
   const slots = (data?.slots ?? []).map(
-    ({ time_start, time_end, occupier_email, status }) => ({
+    ({ slotid, time_start, time_end, occupier_email, status }) => ({
+      // the uuid primary key on the slots table — what /delete-slot needs
+      slotid,
       time_start,
       time_end,
       occupier_email,
@@ -109,6 +107,20 @@ export const fetchSlots = async () => {
   );
   return { ...data, slots };
 };
+
+/**
+ * Create a slot the owner blocked out themselves. Only the two times travel —
+ * the backend owns the rest of the row (no occupier, status starts pending).
+ * Times are ISO 8601 with an explicit offset, matching the booking tool.
+ */
+export const addSlot = ({ time_start, time_end }) =>
+  apiPost("/add-slot", { time_start, time_end });
+
+/**
+ * Remove one slot. The row carries the uuid as `slotid` (the column name),
+ * while /delete-slot's SlotDeletion model reads it as `slot_id`.
+ */
+export const deleteSlot = (slotid) => apiPost("/delete-slot", { slot_id: slotid });
 
 /**
  * POST /query-agent and walk the SSE stream, invoking `onEvent` for each
