@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { fetchRecordCount, ingestPdf } from "../../lib/api.js";
+import { deleteIngestion, fetchIngestions, ingestPdf } from "../../lib/api.js";
 import { formatTime } from "../../lib/hooks.js";
 import "./IngestionPanel.css";
 
@@ -11,13 +11,13 @@ function prettySize(bytes) {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-// record_names entries come back either as a plain id string or as
-// { id: "..." } — accept both and drop anything else rather than
-// crashing the panel.
-function cleanRecordNames(recordNames) {
-  return recordNames
-    .map((entry) => (typeof entry === "string" ? entry : entry?.id))
-    .filter((id) => typeof id === "string");
+// The endpoint answers a bare array of { ingestion_id, source_name }, one
+// entry per ingested document. Guard against a non-array response and drop
+// entries without a usable id rather than crashing the panel — source_name
+// is allowed to be missing/null and gets a placeholder at render time.
+function cleanIngestions(data) {
+  if (!Array.isArray(data)) return [];
+  return data.filter((entry) => typeof entry?.ingestion_id === "string");
 }
 
 export default function IngestionPanel() {
@@ -26,28 +26,25 @@ export default function IngestionPanel() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   const [history, setHistory] = useState([]);
-  const [kbCount, setKbCount] = useState(0);
-  const [kbRecords, setKbRecords] = useState([]);
+  const [kbDocs, setKbDocs] = useState([]);
   const [kbLoading, setKbLoading] = useState(true);
   const [kbError, setKbError] = useState("");
+  const [deletingId, setDeletingId] = useState(null);
   const inputRef = useRef(null);
 
   const ready = Boolean(file) && !busy;
 
-  const loadRecordCount = () => {
+  const loadIngestions = () => {
     setKbError("");
-    return fetchRecordCount()
-      .then((data) => {
-        setKbCount(data?.count ?? 0);
-        setKbRecords(cleanRecordNames(data?.record_names ?? []));
-      })
+    return fetchIngestions()
+      .then((data) => setKbDocs(cleanIngestions(data)))
       .catch((err) => setKbError(err.message || "knowledge base unavailable"));
   };
 
   useEffect(() => {
     let alive = true;
     setKbLoading(true);
-    loadRecordCount().finally(() => {
+    loadIngestions().finally(() => {
       if (alive) setKbLoading(false);
     });
     return () => {
@@ -82,14 +79,15 @@ export default function IngestionPanel() {
     setError("");
     try {
       await ingestPdf(file);
-      record({ name: file.name, size: file.size, ok: true });
+      record({ kind: "ingest", name: file.name, size: file.size, ok: true });
       setFile(null);
       if (inputRef.current) inputRef.current.value = "";
-      loadRecordCount();
+      loadIngestions();
     } catch (err) {
       const message = err.message || "ingestion failed";
       setError(message);
       record({
+        kind: "ingest",
         name: file.name,
         size: file.size,
         ok: false,
@@ -97,6 +95,27 @@ export default function IngestionPanel() {
       });
     } finally {
       setBusy(false);
+    }
+  }
+
+  // Mirrors CheckSlotsPanel's per-row remove(): the busy row is tracked by
+  // its own id so only that row disables, and a failed delete leaves kbDocs
+  // untouched (loadIngestions only runs on success) rather than removing the
+  // row from the UI ahead of the server actually deleting it.
+  async function removeDoc(doc) {
+    const label = doc.source_name || "(unnamed document)";
+    setDeletingId(doc.ingestion_id);
+    setKbError("");
+    try {
+      await deleteIngestion(doc.ingestion_id, doc.source_name ?? null);
+      record({ kind: "delete", name: label, ok: true });
+      await loadIngestions();
+    } catch (err) {
+      const message = err.message || "could not delete that document";
+      setKbError(message);
+      record({ kind: "delete", name: label, ok: false, message });
+    } finally {
+      setDeletingId(null);
     }
   }
 
@@ -182,23 +201,56 @@ export default function IngestionPanel() {
               <div className="ing-kb-head">
                 <h3 className="ing-note-title">Knowledge base</h3>
                 <span className="ing-kb-count mono">
-                  {kbLoading ? "loading…" : `${kbCount} record${kbCount === 1 ? "" : "s"}`}
+                  {kbLoading
+                    ? "loading…"
+                    : `${kbDocs.length} document${kbDocs.length === 1 ? "" : "s"}`}
                 </span>
               </div>
 
               {kbError ? (
                 <p className="ing-error">{kbError}</p>
-              ) : !kbLoading && kbRecords.length === 0 && kbCount === 0 ? (
+              ) : !kbLoading && kbDocs.length === 0 ? (
                 <p className="ing-empty mono">namespace is empty</p>
-              ) : !kbLoading && kbRecords.length === 0 ? (
-                <p className="ing-empty mono">record names unavailable</p>
               ) : (
                 <ul className="ing-kb-list">
-                  {kbRecords.map((name) => (
-                    <li key={name}>
-                      <span className="ing-kb-doc-name mono">{name}</span>
-                    </li>
-                  ))}
+                  {kbDocs.map((doc) => {
+                    const label = doc.source_name || "(unnamed document)";
+                    const busy = deletingId === doc.ingestion_id;
+                    return (
+                      <li key={doc.ingestion_id} className="ing-kb-row">
+                        <span className="ing-kb-doc-name mono" title={label}>
+                          {label}
+                        </span>
+                        <button
+                          type="button"
+                          className="ing-kb-delete"
+                          onClick={() => removeDoc(doc)}
+                          disabled={busy}
+                          title="Delete this document"
+                          aria-label={`Delete ${label}`}
+                        >
+                          {busy ? (
+                            <span className="ing-kb-spinner" />
+                          ) : (
+                            <svg
+                              viewBox="0 0 24 24"
+                              width="15"
+                              height="15"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="1.7"
+                              strokeLinecap="round"
+                            >
+                              <path d="M4 7h16" />
+                              <path d="M10 11v6M14 11v6" />
+                              <path d="M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12" />
+                              <path d="M9 7V5a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2" />
+                            </svg>
+                          )}
+                        </button>
+                      </li>
+                    );
+                  })}
                 </ul>
               )}
             </article>
@@ -229,7 +281,8 @@ export default function IngestionPanel() {
                       <div className="ing-list-text">
                         <span className="ing-list-name">{h.name}</span>
                         <span className="ing-list-meta mono">
-                          {prettySize(h.size)} · {h.time}
+                          {h.kind === "delete" ? "deleted" : "ingested"}
+                          {h.size != null ? ` · ${prettySize(h.size)}` : ""} · {h.time}
                         </span>
                         {!h.ok && <span className="ing-list-err">{h.message}</span>}
                       </div>

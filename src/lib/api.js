@@ -4,8 +4,8 @@
 
 import { expireSession, getAccessToken } from "./session.js";
 
-const DEFAULT_API =
-  "https://ai-workspace-operations-copilot-production.up.railway.app/";
+const DEFAULT_API = "https://ai-workspace-operations-copilot-production.up.railway.app/";
+//const DEFAULT_API = "http://localhost:8000"
 
 function resolveBase() {
   if (typeof window === "undefined") return DEFAULT_API;
@@ -89,7 +89,21 @@ export function ingestPdf(file) {
   return apiUpload("/ingestion", form);
 }
 
-export const fetchRecordCount = () => apiGet("/get-record-count");
+/**
+ * List the documents ingested into the knowledge base — one entry per
+ * ingested document (a row in the `ingestions` table), not per chunk.
+ * Returns a bare array of `{ ingestion_id, source_name }`; `source_name`
+ * may be null.
+ */
+export const fetchIngestions = () => apiGet("/get-record-count");
+
+/**
+ * Delete one ingested document. Same shape as deleteSlot: the row already
+ * gives us everything the backend needs, so both fields travel straight
+ * through — `sourceName` may be null and is sent as-is.
+ */
+export const deleteIngestion = (ingestionId, sourceName) =>
+  apiPost("/delete-ingested-source", { ingestion_id: ingestionId, source_name: sourceName });
 
 // ---- slots ----
 
