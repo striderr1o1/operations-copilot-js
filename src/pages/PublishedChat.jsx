@@ -12,6 +12,12 @@ const QUICK = [
   "I'd like to book an appointment",
 ];
 
+const uniqueId = () => {
+  const dateString = Date.now().toString(36);
+  const randomness = Math.random().toString(36).substr(2);
+  return dateString + randomness;
+};
+
 export default function PublishedChat() {
   const { slug } = useParams();
   const { published, botName, greeting } = useDeployment();
@@ -21,7 +27,12 @@ export default function PublishedChat() {
   if (!published) return <Offline slug={slug} />;
 
   const showQuick = items.length <= 1 && !busy;
-
+  const unique_id = localStorage.getItem('unique_id')
+  if (unique_id === null){
+    const generated_unique_id = uniqueId()
+    console.log(generated_unique_id)
+    localStorage.setItem('unique_id', generated_unique_id)
+  }
   return (
     <main className="pc">
       <div className="pc-bg" aria-hidden="true">

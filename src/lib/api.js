@@ -4,8 +4,9 @@
 
 import { expireSession, getAccessToken } from "./session.js";
 
+// Local backend while debugging; deployed builds set VITE_API_BASE
+// (prod: https://ai-workspace-operations-copilot-production.up.railway.app/).
 const DEFAULT_API = "https://ai-workspace-operations-copilot-production.up.railway.app/";
-//const DEFAULT_API = "http://localhost:8000"
 
 function resolveBase() {
   if (typeof window === "undefined") return DEFAULT_API;
@@ -142,10 +143,11 @@ export const deleteSlot = (slotid) => apiPost("/delete-slot", { slot_id: slotid 
  * "booking agent" and "final response".
  */
 export async function streamQuery(query, onEvent, { signal, id } = {}) {
+    const unique_id = localStorage.getItem('unique_id')
   const res = await fetch(`${API_BASE}${id ? `/c/query-agent/${id}` : "/query-agent"}`, {
     method: "POST",
     headers: authHeaders({ "Content-Type": "application/json" }),
-    body: JSON.stringify({ query }),
+    body: JSON.stringify({ query, "unique_id": unique_id }),
     signal,
   });
 

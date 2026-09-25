@@ -1,4 +1,5 @@
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { useAuth } from "./auth.jsx";
 import { fetchPublicUrl, setPublishStatus } from "./api.js";
 
 /**
@@ -31,6 +32,7 @@ function readStored() {
 }
 
 export function DeploymentProvider({ children }) {
+  const { isAuthed } = useAuth();
   const [deployment, setDeployment] = useState(readStored);
   const [remoteUrl, setRemoteUrl] = useState("");
   const [urlLoaded, setUrlLoaded] = useState(false);
@@ -44,6 +46,17 @@ export function DeploymentProvider({ children }) {
     // table, not in the browser. Until the backend hands back a real code the
     // dashboard has nothing to show, so keep asking (a fetch failure is often
     // just the session not being ready yet) instead of inventing a slug.
+    //
+    // This provider wraps every route, including the public /c/:slug chat that
+    // customers open without an account. /get-url sits behind
+    // check_session_exists, so asking for it there is a guaranteed 401 — and
+    // retrying one would loop forever. Only the signed-in operator polls.
+    if (!isAuthed) {
+      setRemoteUrl("");
+      setUrlLoaded(false);
+      return undefined;
+    }
+
     let alive = true;
     let timer;
 
@@ -61,8 +74,10 @@ export function DeploymentProvider({ children }) {
           if (url) setUrlLoaded(true);
           else timer = setTimeout(load, RETRY_MS);
         })
-        .catch(() => {
-          if (alive) timer = setTimeout(load, RETRY_MS);
+        .catch((err) => {
+          // A rejected token will be rejected again in four seconds; api.js has
+          // already expired the session, so let that unwind instead of looping.
+          if (alive && err?.status !== 401) timer = setTimeout(load, RETRY_MS);
         });
     };
 
@@ -71,7 +86,7 @@ export function DeploymentProvider({ children }) {
       alive = false;
       clearTimeout(timer);
     };
-  }, []);
+  }, [isAuthed]);
 
   const value = useMemo(() => {
     const update = (patch) => setDeployment((d) => ({ ...d, ...patch }));

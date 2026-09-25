@@ -11,12 +11,19 @@ const AuthContext = createContext(null);
 export function AuthProvider({ children }) {
   const [auth, setAuth] = useState(readSession);
 
-  useEffect(() => {
-    writeSession(auth);
-  }, [auth]);
-
-  const login = useCallback((payload) => setAuth(payload), []);
-  const logout = useCallback(() => setAuth(null), []);
+  // Storage is written here, not in an effect on [auth]. api.js reads the token
+  // straight out of localStorage, and effects flush child-first: a consumer
+  // nested under this provider (DeploymentProvider) fires its own [isAuthed]
+  // effect on the login commit *before* a write-on-change effect here would
+  // run, so its request would go out unauthenticated and 401 the fresh session.
+  const login = useCallback((payload) => {
+    writeSession(payload);
+    setAuth(payload);
+  }, []);
+  const logout = useCallback(() => {
+    writeSession(null);
+    setAuth(null);
+  }, []);
 
   // api.js fires this when the backend 401s a token we thought was good. Without
   // it the dashboard would keep rendering while every request underneath failed.
